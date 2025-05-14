@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: animal_Hospital_Service
