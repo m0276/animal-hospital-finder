@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Locator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    gmpx-store-locator {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <!-- Tell Thymeleaf to parse JavaScript inline -->
+  <script th:inline="javascript">
+    const CONFIGURATION = {
+      locations: [], // 빈 배열로 시작
+      mapOptions: {
+        center: { lat: 36.5, lng: 127.8 }, // 대한민국 중심
+        zoom: 7
+      },
+      "mapsApiKey": '[[${googleKey}]]',
+      "capabilities": {
+        "input": true,
+        "autocomplete": true,
+        "directions": false,
+        "distanceMatrix": true,
+        "details": false,
+        "actions": false
+      }
+    };
+  </script>
+
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', async () => {
+      await customElements.whenDefined('gmpx-store-locator');
+      const locator = document.querySelector('gmpx-store-locator');
+      locator.configureFromQuickBuilder(CONFIGURATION);
+    });
+  </script>
+</head>
+
+<body>
+<!-- maps API 로더 태그에 Thymeleaf 변수 삽입 -->
+<gmpx-api-loader th:attr="key=${googleKey}" solution-channel="GMP_QB_locatorplus_v11_cABD"></gmpx-api-loader>
+<gmpx-store-locator map-id="DEMO_MAP_ID"></gmpx-store-locator>
+
+<!-- Google Maps JS API 로더 -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
+</body>
+</html>

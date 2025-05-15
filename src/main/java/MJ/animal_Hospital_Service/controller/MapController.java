@@ -2,12 +2,11 @@ package MJ.animal_Hospital_Service.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 public class MapController {
-  //https://apis.map.kakao.com/web/guide/#loadlibrary
-
 
 }
+//https://apis.map.kakao.com/web/guide/#loadlibrary

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HospitalDto {
-  String id;
+  String location_id;
   String place_name;
   String category_name;
   String category_group_code;
