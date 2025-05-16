@@ -18,4 +18,7 @@ public class HospitalDto {
   String x;
   String y;
   String place_url;
+  String tag;
+  String tag2;
+  String tag3;
 }
