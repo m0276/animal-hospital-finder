@@ -7,6 +7,7 @@ import MJ.animal_Hospital_Service.service.user.UserService;
 import MJ.animal_Hospital_Service.util.LoginUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,9 @@ import org.springframework.web.server.NotAcceptableStatusException;
 @Service
 @Transactional
 public class FavoriteService {
-  private FavoriteRepository favoriteRepository;
-  private FavoriteMapper favoriteMapper;
-  private UserService userService;
+  private final FavoriteRepository favoriteRepository;
+  private final FavoriteMapper favoriteMapper;
+  private final UserService userService;
 
   public List<FavoriteDto> getList(){
     if(LoginUtil.isLogin()){
@@ -39,16 +40,30 @@ public class FavoriteService {
     else throw new NotAcceptableStatusException("로그인 후 확인할 수 있습니다.");
   }
 
-  private void save(){
+  public void saveOrDelete(String hospitalId){
     if(LoginUtil.isLogin()){
       String username = LoginUtil.getCurrentUser();
+      if(favoriteRepository.findByUserId(userService.findByUserNameReturnId(username)).stream()
+          .map(Favorite::getHospitalId).collect(Collectors.toSet()).contains(hospitalId)){
+        delete(hospitalId,userService.findByUserNameReturnId(username));
+      }
+      else save(hospitalId,userService.findByUserNameReturnId(username));
 
-      //dto는 병원 이름을 가지고 있고 domain은 병원 위치를 가지고 있음 > hospital service 단에서 처리가 필요해보입
 
 
     }
     else throw new NotAcceptableStatusException("로그인 후 기능을 사용 할 수 있습니다.");
   }
 
-  //delete와 delete 또는 save인지 판단하는 로직 구현 필요
+  private void save(String hospitalId,Long userId){
+    Favorite favorite = Favorite.builder()
+        .hospitalId(hospitalId)
+        .userId(userId)
+        .build();
+    favoriteRepository.save(favorite);
+  }
+
+  private void delete(String hospitalId,Long userId){
+    favoriteRepository.deleteByHospitalIdAndUserId(hospitalId,userId);
+  }
 }

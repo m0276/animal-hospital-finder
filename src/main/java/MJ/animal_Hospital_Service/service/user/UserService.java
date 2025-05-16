@@ -18,8 +18,8 @@ import org.springframework.web.server.NotAcceptableStatusException;
 @Transactional
 public class UserService {
 
-  private UserMapper userMapper;
-  private UserRepository userRepository;
+  private final UserMapper userMapper;
+  private final UserRepository userRepository;
 
   public UserDto save(UserCreateRequest request){
     User user = User.builder().username(request.getUsername())
@@ -55,5 +55,10 @@ public class UserService {
 
   private boolean loginCheck(){
     return LoginUtil.isLogin();
+  }
+
+  public Long findByUserNameReturnId(String username){
+    if(userRepository.findByUsername(username) == null) throw new NoSuchElementException();
+    return userRepository.findByUsername(username).getId();
   }
 }

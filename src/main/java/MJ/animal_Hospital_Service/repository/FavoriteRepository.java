@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
   List<Favorite> findByUserId(Long userId);
+  void deleteByHospitalIdAndUserId(String hospitalId,Long userId);
 }

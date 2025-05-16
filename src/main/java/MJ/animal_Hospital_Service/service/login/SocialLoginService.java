@@ -9,6 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SocialLoginService {
-  private UserService userService;
+  private final UserService userService;
 
 }

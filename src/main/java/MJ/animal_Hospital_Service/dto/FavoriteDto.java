@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class FavoriteDto {
   String username;
-  HospitalDto hospital;
+  String hospital_id;
   String tag;
 }
