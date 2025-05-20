@@ -23,4 +23,11 @@ public class GlobalExceptionHandler {
         HttpStatus.UNAUTHORIZED.value(),
         e.getMessage()));
   }
+
+  @ExceptionHandler(NullPointerException.class)
+  public ResponseEntity<ErrorResponse> NullPointException(NullPointerException e){
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
+        HttpStatus.BAD_REQUEST.value(),
+        e.getMessage()));
+  }
 }

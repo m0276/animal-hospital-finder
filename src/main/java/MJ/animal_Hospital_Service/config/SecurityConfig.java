@@ -3,6 +3,7 @@ package MJ.animal_Hospital_Service.config;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,7 +24,10 @@ public class SecurityConfig {
     http .csrf(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
-            .requestMatchers("/api/hospital/**").hasAnyRole("HOSPITAL")
+            .requestMatchers("/api/hospital/**").hasRole("HOSPITAL")
+            .requestMatchers(HttpMethod.DELETE,"/api/user/me").authenticated()
+            .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
+            .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()
             .requestMatchers("/").permitAll()
             .anyRequest().authenticated())
         .formLogin(login -> login.defaultSuccessUrl("/"))

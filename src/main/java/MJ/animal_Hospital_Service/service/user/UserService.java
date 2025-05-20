@@ -32,8 +32,6 @@ public class UserService {
 
 
   public UserDto update(UserUpdateRequest request){
-    if(!loginCheck()) throw new AuthorizationDeniedException("로그인을 진행해주세요");
-
     User user = userRepository.findByUsername(LoginUtil.getCurrentUser());
     user.setPassword(request.getNewPassword());
 
@@ -41,21 +39,15 @@ public class UserService {
   }
 
   public void delete(String username){
-    if(!loginCheck()) throw new AuthorizationDeniedException("로그인을 진행해주세요");
     User user = userRepository.findByUsername(LoginUtil.getCurrentUser());
     if(user.getUsername().equals(username)) userRepository.delete(user);
   }
 
   public UserDto get(String username){
-    if(!loginCheck()) throw new AuthorizationDeniedException("로그인을 진행해주세요");
     User user = userRepository.findByUsername(LoginUtil.getCurrentUser());
     if(user.getUsername().equals(username)) return userMapper.toUserDto(user);
 
     throw new NoSuchElementException("해당 유저가 없습니다.");
-  }
-
-  private boolean loginCheck(){
-    return LoginUtil.isLogin();
   }
 
   public Long findByUserNameReturnId(String username){
