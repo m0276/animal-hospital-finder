@@ -23,6 +23,7 @@ public class SecurityConfig {
     http .csrf(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
+            .requestMatchers("/api/hospital/**").hasAnyRole("HOSPITAL")
             .requestMatchers("/").permitAll()
             .anyRequest().authenticated())
         .formLogin(login -> login.defaultSuccessUrl("/"))

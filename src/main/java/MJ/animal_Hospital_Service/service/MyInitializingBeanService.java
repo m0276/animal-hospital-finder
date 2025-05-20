@@ -93,11 +93,11 @@ public class MyInitializingBeanService implements InitializingBean {
         Map<String, Object> location = (Map<String, Object>) geometry.get("location");
 
         HospitalDto loc = new HospitalDto();
-        loc.setPlace_name((String) place.get("name"));
+        loc.setPlace_name((String) place.get("username"));
         loc.setRoad_address_name((String) place.get("formatted_address"));
         loc.setX((String) location.get("lat"));
         loc.setY((String) location.get("lng"));
-        loc.setLocation_id((String) place.get("place_id"));
+        loc.setLocation_id((String) place.get("place_name"));
 
         results.add(loc);
       }
@@ -145,16 +145,14 @@ public class MyInitializingBeanService implements InitializingBean {
 
   private void saveHospital(HospitalDto dto) {
     Hospital hospital = Hospital.builder()
-        .location_id(dto.getLocation_id())
-        .address_name(dto.getAddress_name())
-        .place_name(dto.getPlace_name())
-        .category_group_code(dto.getCategory_group_code())
-        .category_group_name(dto.getCategory_group_name())
-        .category_name(dto.getCategory_name())
+        .locationId(dto.getLocation_id())
+        .addressName(dto.getAddress_name())
+        .placeName(dto.getPlace_name())
+        .roadAddressName(dto.getRoad_address_name())
         .x(dto.getX())
         .y(dto.getY())
-        .road_address_name(dto.getRoad_address_name())
         .build();
+
 
     if(dto.getPhone() != null) hospital.setPhone(dto.getPhone());
     if(dto.getPlace_url() != null) hospital.setPlace_url(dto.getPlace_url());

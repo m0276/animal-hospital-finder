@@ -15,38 +15,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Hospital {
   @Id
-  String location_id;
-
-  @Column(nullable = false)
-  String place_name;
-
-  @Column(nullable = false)
-  String category_name;
-
-  @Column(nullable = false)
-  String category_group_code;
-
-  @Column(nullable = false)
-  String category_group_name;
-
+  @Column(name = "location_id")
+  String locationId;
+  @Column(nullable = false, name = "place_name")
+  String placeName;
   @Column
   String phone;
-
-  @Column(nullable = false)
-  String address_name;
-
-  @Column(nullable = false)
-  String road_address_name;
-
-  @Column
-  String place_url;
-
+  @Column(name = "address_name")
+  String addressName;
+  @Column(name = "road_address_name")
+  String roadAddressName;
+  @Column(name = "place_url")
+  String placeUrl;
   @Column(nullable = false)
   String x;
-
   @Column(nullable = false)
   String y;
-
   @Column
   String tag;
   @Column
@@ -63,7 +47,7 @@ public class Hospital {
   }
 
   public void setPlace_url(String place_url) {
-    this.place_url = place_url;
+    this.placeUrl = place_url;
   }
 
   public void setTag2(String tag2) {
@@ -73,4 +57,5 @@ public class Hospital {
   public void setTag3(String tag3) {
     this.tag3 = tag3;
   }
+
 }

@@ -2,6 +2,7 @@ package MJ.animal_Hospital_Service.util;
 
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class LoginUtil {
 
   public static boolean isLogin(){
-    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     return authentication != null &&
         authentication.isAuthenticated() &&
         !(authentication instanceof AnonymousAuthenticationToken);

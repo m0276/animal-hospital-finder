@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +22,6 @@ public class Favorite {
   @Column(nullable = false, name = "user_id")
   Long userId;
 
-  @Column(nullable = false, name = "hospital_location")
+  @Column(nullable = false, name = "hospital_id")
   String hospitalId; // 카카오맵의 place id / 구글맵의 location id 활용
 }
