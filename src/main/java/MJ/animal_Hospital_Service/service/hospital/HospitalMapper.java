@@ -4,25 +4,26 @@ import MJ.animal_Hospital_Service.domain.Hospital;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface HospitalMapper {
 
-  @Mapping(target = "x", source = "x", expression = "java(doubleToString)")
-  @Mapping(target = "y", source = "y", expression = "java(doubleToString)")
+  @Mapping(target = "x", source = "x", qualifiedByName = "doubleToString")
+  @Mapping(target = "y", source = "y", qualifiedByName = "doubleToString")
   HospitalDto toDto(Hospital hospital);
 
-  @Mapping(target = "x", source = "x", expression = "java(StringToDouble)")
-  @Mapping(target = "y", source = "y", expression = "java(StringToDouble)")
-  Hospital toEntity(HospitalDto hospital);
+  @Mapping(target = "x", source = "x", qualifiedByName = "stringToDouble")
+  @Mapping(target = "y", source = "y", qualifiedByName = "stringToDouble")
+  Hospital toEntity(HospitalDto dto);
 
-  private String doubleToString(Double x){
-    return Double.toString(x);
+  @Named("doubleToString")
+  static String doubleToString(Double value) {
+    return value != null ? value.toString() : null;
   }
 
-  private Double StringToDouble(String x){
-    return Double.parseDouble(x);
+  @Named("stringToDouble")
+  static Double stringToDouble(String value) {
+    return value != null ? Double.parseDouble(value) : null;
   }
-
-
 }
