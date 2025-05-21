@@ -31,8 +31,14 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<UserDto> join(@RequestBody UserCreateRequest request){
-    return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
+  public ResponseEntity<UserDto> joinUser(@RequestBody UserCreateRequest request){
+    return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveUserAuth(request));
+  }
+
+
+  @PostMapping("/hospital")
+  public ResponseEntity<UserDto> joinHospital(@RequestBody UserCreateRequest request){
+    return ResponseEntity.status(HttpStatus.CREATED).body(userService.saveHospitalAuth(request));
   }
 
   @DeleteMapping("/me")
