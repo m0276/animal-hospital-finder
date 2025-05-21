@@ -12,8 +12,16 @@ public interface HospitalMapper {
   @Mapping(target = "y", source = "y", expression = "java(doubleToString)")
   HospitalDto toDto(Hospital hospital);
 
+  @Mapping(target = "x", source = "x", expression = "java(StringToDouble)")
+  @Mapping(target = "y", source = "y", expression = "java(StringToDouble)")
+  Hospital toEntity(HospitalDto hospital);
+
   private String doubleToString(Double x){
     return Double.toString(x);
+  }
+
+  private Double StringToDouble(String x){
+    return Double.parseDouble(x);
   }
 
 

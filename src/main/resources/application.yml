@@ -1,3 +1,9 @@
 spring:
   application:
     name: animal_Hospital_Service
+
+  jpa:
+    properties:
+      hibernate.jdbc.batch_size: 1000
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
