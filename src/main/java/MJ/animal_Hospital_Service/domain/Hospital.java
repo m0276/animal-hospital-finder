@@ -3,6 +3,7 @@ package MJ.animal_Hospital_Service.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name =  "hospital")
 public class Hospital {
   @Id
   @Column(name = "location_id")
@@ -28,9 +30,9 @@ public class Hospital {
   @Column(name = "place_url")
   String placeUrl;
   @Column(nullable = false)
-  String x;
+  Double x;
   @Column(nullable = false)
-  String y;
+  Double y;
   @Column
   String tag;
   @Column
