@@ -1,5 +1,6 @@
-package MJ.animal_Hospital_Service.exception;
+package MJ.animal_Hospital_Service.handler;
 
+import MJ.animal_Hospital_Service.exception.ErrorResponse;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
