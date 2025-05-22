@@ -11,6 +11,7 @@ import MJ.animal_Hospital_Service.util.LoginUtil;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,31 +45,35 @@ public class UserService {
 
 
   public UserDto update(UserUpdateRequest request){
-    User user = userRepository.findByUsername(LoginUtil.getCurrentUser());
+    User user = userRepository.findByUsername(LoginUtil.getCurrentUser())
+        .orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다."));
     user.setPassword(request.getNewPassword());
 
     return userMapper.toUserDto(user);
   }
 
   public void delete(String username){
-    User user = userRepository.findByUsername(LoginUtil.getCurrentUser());
+    User user = userRepository.findByUsername(LoginUtil.getCurrentUser())
+        .orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다."));
     if(user.getUsername().equals(username)) userRepository.delete(user);
+    else throw new AuthorizationDeniedException("권한이 없습니다");
   }
 
   public UserDto get(String username){
-    User user = userRepository.findByUsername(LoginUtil.getCurrentUser());
-    if(user.getUsername().equals(username)) return userMapper.toUserDto(user);
+    User user = userRepository.findByUsername(LoginUtil.getCurrentUser())
+        .orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다."));
 
-    throw new NoSuchElementException("해당 유저가 없습니다.");
+    if(user.getUsername().equals(username)) return userMapper.toUserDto(user);
+    else throw new AuthorizationDeniedException("권한이 없습니다");
   }
 
   public Long findByUserNameReturnId(String username){
-    if(userRepository.findByUsername(username) == null) throw new NoSuchElementException();
-    return userRepository.findByUsername(username).getId();
+     return userRepository.findByUsername(LoginUtil.getCurrentUser())
+        .orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다.")).getId();
   }
 
   public void findAdmin(){
-    if(userRepository.findByUsername("admin") == null){
+    if(userRepository.findByUsername("admin").isEmpty()){
       User user = User.builder()
           .roles(Set.of(Role.ROLE_ADMIN))
           .username("admin")

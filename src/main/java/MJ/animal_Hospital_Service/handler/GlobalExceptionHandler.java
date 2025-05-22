@@ -2,6 +2,7 @@ package MJ.animal_Hospital_Service.handler;
 
 import MJ.animal_Hospital_Service.exception.ErrorResponse;
 import java.util.NoSuchElementException;
+import javax.security.sasl.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -31,4 +32,12 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST.value(),
         e.getMessage()));
   }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ErrorResponse> AuthenticationException(AuthorizationDeniedException e){
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(
+        HttpStatus.UNAUTHORIZED.value(),
+        e.getMessage()));
+  }
+
 }
