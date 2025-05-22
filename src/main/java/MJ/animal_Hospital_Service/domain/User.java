@@ -39,6 +39,9 @@ public class User {
   @Column // social login 체크용
   String type;
 
+  @Column
+  String typeId;
+
   public void setPassword(String password) {
     this.password = password;
   }

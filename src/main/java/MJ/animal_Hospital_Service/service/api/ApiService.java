@@ -92,11 +92,9 @@ public class ApiService {
         Map<String, Object> location = (Map<String, Object>) geometry.get("location");
 
         HospitalDto loc = new HospitalDto();
-        loc.setPlace_name((String) place.get("username"));
-        loc.setRoad_address_name((String) place.get("formatted_address"));
+        loc.setPlace_name((String) place.get("place_name"));
         loc.setX((String) location.get("lat"));
         loc.setY((String) location.get("lng"));
-        loc.setLocation_id((String) place.get("place_name"));
 
         results.add(loc);
       }
