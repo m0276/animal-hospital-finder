@@ -1,13 +1,15 @@
-package MJ.animal_Hospital_Service.service.api;
+package MJ.animal_Hospital_Service.service.data;
 
 import MJ.animal_Hospital_Service.domain.Hospital;
 import MJ.animal_Hospital_Service.domain.HospitalKey;
-import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.repository.HospitalRepository;
+import MJ.animal_Hospital_Service.service.api.ApiService;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.similarity.JaroWinklerSimilarity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,27 @@ public class DataPatchService {
   private final ApiService apiService;
   private final HospitalRepository hospitalRepository;
 
-  void updateHospitals(List<Hospital> hospitals) {
+  public void updateHospitals(List<Hospital> hospitals) {
+
+    class HospitalMatcher {
+
+      final double nameDiff = 0.9;
+      final double locDiff =  0.0005;
+
+      private final JaroWinklerSimilarity similarity = new JaroWinklerSimilarity();
+
+      boolean matches(Set<HospitalKey> candidates, HospitalKey target) {
+        return candidates.stream().anyMatch(candidate -> {
+          double score = similarity.apply(candidate.getName(), target.getName());
+          boolean close = Math.abs(candidate.getLat() - target.getLat()) < locDiff &&
+              Math.abs(candidate.getLng() - target.getLng()) < locDiff;
+          return score >= nameDiff && close;
+        });
+      }
+    }
+
+    HospitalMatcher matcher = new HospitalMatcher();
+
     @NotNull Set<HospitalKey> unique = apiService.searchHospitals("특수동물").stream().map(
             dto -> new HospitalKey(dto.getPlace_name(), Double.parseDouble(dto.getX()),
                 Double.parseDouble(dto.getY())))
@@ -35,18 +57,18 @@ public class DataPatchService {
     for (Hospital hospital : hospitals) {
       HospitalKey key = new HospitalKey(hospital.getPlaceName(), hospital.getX(), hospital.getY());
 
-      if (unique.contains(key)) {
+      if (matcher.matches(unique,key)) {
         hospital.setTag("특수동물");
       }
 
-      if (allDay.contains(key)) {
+      if (matcher.matches(allDay,key)) {
         if (hospital.getTag() != null)
           hospital.setTag2("24시간");
         else
           hospital.setTag("24시간");
       }
 
-      if (small.contains(key)) {
+      if (matcher.matches(small,key)) {
         if (hospital.getTag() == null)
           hospital.setTag("소동물");
         else if (hospital.getTag2() == null)

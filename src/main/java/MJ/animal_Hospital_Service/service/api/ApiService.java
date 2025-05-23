@@ -72,7 +72,7 @@ public class ApiService {
     return Collections.emptyList();
   }
 
-   protected List<HospitalDto> searchHospitals(String keyword) {
+  public List<HospitalDto> searchHospitals(String keyword) {
     String url = UriComponentsBuilder
         .fromHttpUrl("https://maps.googleapis.com/maps/api/place/textsearch/json")
         .queryParam("query", keyword)

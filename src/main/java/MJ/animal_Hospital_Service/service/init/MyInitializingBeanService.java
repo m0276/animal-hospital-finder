@@ -1,8 +1,8 @@
-package MJ.animal_Hospital_Service.service.api;
+package MJ.animal_Hospital_Service.service.init;
 
-import MJ.animal_Hospital_Service.domain.Hospital;
+import MJ.animal_Hospital_Service.service.api.ApiService;
+import MJ.animal_Hospital_Service.service.data.DataPatchService;
 import MJ.animal_Hospital_Service.service.user.UserService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;

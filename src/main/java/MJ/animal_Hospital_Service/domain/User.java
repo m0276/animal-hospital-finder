@@ -39,7 +39,7 @@ public class User {
   @Column // social login 체크용
   String type;
 
-  @Column
+  @Column(name = "type_id")
   String typeId;
 
   public void setPassword(String password) {
