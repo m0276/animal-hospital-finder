@@ -4,6 +4,8 @@ package MJ.animal_Hospital_Service.service.hospital;
 import MJ.animal_Hospital_Service.domain.Hospital;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.repository.HospitalRepository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,16 @@ public class HospitalService {
     else hospital.setTag3(null);
 
     return hospitalMapper.toDto(hospital);
+  }
+
+  public List<HospitalDto> findInRangeHospital(String x, String y){
+    List<Hospital> list = hospitalRepository.findAllByLoc(Double.parseDouble(x),Double.parseDouble(y));
+    List<HospitalDto> result = new ArrayList<>();
+    for(Hospital h : list){
+      result.add(hospitalMapper.toDto(h));
+    }
+
+    return result;
   }
 
 }
