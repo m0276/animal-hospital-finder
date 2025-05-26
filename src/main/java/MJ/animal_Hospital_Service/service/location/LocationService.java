@@ -41,7 +41,7 @@ public class LocationService {
     return hospitalService.findInRangeHospital(x,y);
   }
 
-  public String makeSignature(String method, String url, String timestamp, String accessKey, String secretKey) throws Exception {
+  private String makeSignature(String method, String url, String timestamp, String accessKey, String secretKey) throws Exception {
     String space = " ";
     String newLine = "\n";
 

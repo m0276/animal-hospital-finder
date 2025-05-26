@@ -45,5 +45,8 @@ public class User {
   public void setPassword(String password) {
     this.password = password;
   }
+  public void setRoles(Role role){
+    roles.add(role);
+  }
 
 }

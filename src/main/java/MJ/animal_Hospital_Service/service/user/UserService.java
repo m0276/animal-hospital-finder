@@ -58,7 +58,7 @@ public class UserService {
   public UserDto update(UserUpdateRequest request){
     User user = userRepository.findByUsername(LoginUtil.getCurrentUser())
         .orElseThrow(() -> new NoSuchElementException("해당 유저가 없습니다."));
-    user.setPassword(request.getNewPassword());
+    user.setPassword(encoder.encode(request.getNewPassword()));
 
     return userMapper.toUserDto(user);
   }
