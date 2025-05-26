@@ -3,7 +3,7 @@ package MJ.animal_Hospital_Service.service.user;
 
 import MJ.animal_Hospital_Service.config.Role;
 import MJ.animal_Hospital_Service.domain.User;
-import MJ.animal_Hospital_Service.dto.NaverUserInfo;
+import MJ.animal_Hospital_Service.dto.SocialLoginUserInfo;
 import MJ.animal_Hospital_Service.dto.UserCreateRequest;
 import MJ.animal_Hospital_Service.dto.UserDto;
 import MJ.animal_Hospital_Service.dto.UserUpdateRequest;
@@ -98,7 +98,7 @@ public class UserService {
   private final RestTemplate restTemplate = new RestTemplate();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public NaverUserInfo getUserInfo(String accessToken) {
+  public SocialLoginUserInfo getNaverUserInfo(String accessToken) {
     String url = "https://openapi.naver.com/v1/nid/me";
 
     HttpHeaders headers = new HttpHeaders();
@@ -118,7 +118,7 @@ public class UserService {
       JsonNode jsonNode = objectMapper.readTree(response.getBody());
       JsonNode responseNode = jsonNode.get("response");
 
-      return NaverUserInfo.builder()
+      return SocialLoginUserInfo.builder()
           .id(responseNode.get("id").asText())
           .name(responseNode.get("name").asText(null))
           .build();
@@ -128,7 +128,39 @@ public class UserService {
     }
   }
 
-  public User saveOrUpdateNaverUser(NaverUserInfo userInfo) {
+  public SocialLoginUserInfo getKakaoUserInfo(String accessToken) {
+    String url = "https://kapi.kakao.com/v2/user/me";
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(accessToken);
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+    HttpEntity<String> entity = new HttpEntity<>("", headers);
+
+    ResponseEntity<String> response = restTemplate.exchange(
+        url,
+        HttpMethod.GET,
+        entity,
+        String.class
+    );
+
+    try {
+      JsonNode jsonNode = objectMapper.readTree(response.getBody());
+      String id = jsonNode.get("id").toString();
+      JsonNode profile = jsonNode.path("kakao_account").path("profile");
+      String nickname = profile.path("nickname").asText(null);
+
+      return SocialLoginUserInfo.builder()
+          .id(id)
+          .name(nickname)
+          .build();
+
+    } catch (Exception e) {
+      throw new NoSuchElementException("Failed to parse user info from Kakao", e);
+    }
+  }
+
+  public User saveOrUpdateNaverUser(SocialLoginUserInfo userInfo) {
     Optional<User> existing = userRepository.findByTypeAndTypeId("naver",userInfo.getId());
 
     return existing.orElseGet(() -> existing
@@ -137,6 +169,23 @@ public class UserService {
               .username(userInfo.getName())
               .password(encoder.encode("naverUser" + UUID.randomUUID()))
               .type("naver")
+              .typeId(userInfo.getId())
+              .build();
+          return userRepository.save(newUser);
+        }));
+
+
+  }
+
+  public User saveOrUpdateKakaoUser(SocialLoginUserInfo userInfo) {
+    Optional<User> existing = userRepository.findByTypeAndTypeId("kakao",userInfo.getId());
+
+    return existing.orElseGet(() -> existing
+        .orElseGet(() -> {
+          User newUser = User.builder()
+              .username(userInfo.getName())
+              .password(encoder.encode("kakaoUser" + UUID.randomUUID()))
+              .type("kakao")
               .typeId(userInfo.getId())
               .build();
           return userRepository.save(newUser);

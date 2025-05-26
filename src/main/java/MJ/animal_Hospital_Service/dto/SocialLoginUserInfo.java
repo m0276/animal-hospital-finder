@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class NaverUserInfo {
+public class SocialLoginUserInfo {
   private String id;
   private String name;
 }
