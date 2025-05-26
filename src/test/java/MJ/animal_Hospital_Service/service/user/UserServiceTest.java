@@ -40,6 +40,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith( MockitoExtension.class)
 class UserServiceTest {
+
   @InjectMocks
   UserService userService;
 
@@ -52,19 +53,16 @@ class UserServiceTest {
   @Spy
   UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
-  @BeforeEach
-  void setAuth(){
-    Authentication authentication = mock(Authentication.class);
+  Authentication authentication = mock(Authentication.class);
+  SecurityContext securityContext = mock(SecurityContext.class);
+  org.springframework.security.core.userdetails.User userDetails;
 
-    org.springframework.security.core.userdetails.User userDetails =
+  @BeforeEach
+  void setAuth() {
+    userDetails =
         new org.springframework.security.core.userdetails.User("testUser",
             "password", Set.of());
-    given(authentication.getPrincipal()).willReturn(userDetails);
-
-    SecurityContext securityContext = mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
-
-    given(securityContext.getAuthentication()).willReturn(authentication);
   }
 
 
@@ -77,7 +75,7 @@ class UserServiceTest {
 
     UserDto user = userService.saveUserAuth(request);
 
-    assertEquals(user.username(),request.getUsername());
+    assertEquals(user.username(), request.getUsername());
     assertEquals(user.roles(), Set.of(Role.ROLE_USER));
   }
 
@@ -90,8 +88,8 @@ class UserServiceTest {
 
     UserDto user = userService.saveHospitalAuth(request);
 
-    assertEquals(user.username(),request.getUsername());
-    assertEquals(user.roles(),Set.of(Role.ROLE_HOSPITAL));
+    assertEquals(user.username(), request.getUsername());
+    assertEquals(user.roles(), Set.of(Role.ROLE_HOSPITAL));
   }
 
   @Test
@@ -107,12 +105,14 @@ class UserServiceTest {
 
     request.setUsername("testUser");
     request.setNewPassword("newPassword");
+    given(authentication.getPrincipal()).willReturn(userDetails);
+    given(securityContext.getAuthentication()).willReturn(authentication);
 
     given(userRepository.findByUsername("testUser")).willReturn(Optional.of(resultUser));
 
     userService.update(request);
 
-    assertTrue(encoder.matches("newPassword",resultUser.getPassword()));
+    assertTrue(encoder.matches("newPassword", resultUser.getPassword()));
   }
 
   @Test
@@ -122,28 +122,45 @@ class UserServiceTest {
     given(userRepository.findByUsername(any(String.class))).willReturn(
         Optional.of(User.builder().username("testUser").build()));
 
+    given(authentication.getPrincipal()).willReturn(userDetails);
+    given(securityContext.getAuthentication()).willReturn(authentication);
+
     userService.delete("testUser");
 
-    verify(userRepository,times(1)).delete(any(User.class));
+    verify(userRepository, times(1)).delete(any(User.class));
   }
 
   @Test
   void get() {
+    User user = User.builder()
+        .id(1L)
+        .username("testUser")
+        .build();
+
+    given(authentication.getPrincipal()).willReturn(userDetails);
+    given(securityContext.getAuthentication()).willReturn(authentication);
+
+    given(userRepository.findByUsername("testUser")).willReturn(Optional.of(user));
+
+    UserDto userDto = userService.get("testUser");
+
+    assertEquals(userDto.id(), user.getId());
   }
 
   @Test
   void findByUserNameReturnId() {
-  }
+    User user = User.builder()
+        .id(1L)
+        .username("testUser")
+        .build();
 
-  @Test
-  void findAdmin() {
-  }
+    given(authentication.getPrincipal()).willReturn(userDetails);
+    given(securityContext.getAuthentication()).willReturn(authentication);
 
-  @Test
-  void getUserInfo() {
-  }
+    given(userRepository.findByUsername("testUser")).willReturn(Optional.of(user));
 
-  @Test
-  void saveOrUpdateNaverUser() {
+    Long result = userService.findByUserNameReturnId("testUser");
+
+    assertEquals(user.getId(), result);
   }
 }
