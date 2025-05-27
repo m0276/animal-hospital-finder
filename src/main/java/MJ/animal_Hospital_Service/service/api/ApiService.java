@@ -56,6 +56,10 @@ public class ApiService {
           String.class
       );
 
+      if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+        return Collections.emptyList();
+      }
+
       List<Hospital> list = new ArrayList<>();
 
       JsonNode documents = objectMapper.readTree(response.getBody()).path("documents");
@@ -92,7 +96,7 @@ public class ApiService {
         Map<String, Object> location = (Map<String, Object>) geometry.get("location");
 
         HospitalDto loc = new HospitalDto();
-        loc.setPlace_name((String) place.get("place_name"));
+        loc.setPlace_name((String) place.get("name"));
         loc.setX((String) location.get("lat"));
         loc.setY((String) location.get("lng"));
 

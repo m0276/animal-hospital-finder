@@ -30,12 +30,16 @@ public class DataPatchService {
       private final JaroWinklerSimilarity similarity = new JaroWinklerSimilarity();
 
       boolean matches(Set<HospitalKey> candidates, HospitalKey target) {
-        return candidates.stream().anyMatch(candidate -> {
-          double score = similarity.apply(candidate.getName(), target.getName());
-          boolean close = Math.abs(candidate.getLat() - target.getLat()) < locDiff &&
-              Math.abs(candidate.getLng() - target.getLng()) < locDiff;
-          return score >= nameDiff && close;
-        });
+//        return candidates.stream().anyMatch(candidate -> {
+//          double score = similarity.apply(candidate.getName(), target.getName());
+//          boolean close = Math.abs(candidate.getLat() - target.getLat()) < locDiff &&
+//              Math.abs(candidate.getLng() - target.getLng()) < locDiff;
+//          return score >= nameDiff && close;
+//        });
+        return candidates.stream()
+            .filter(candidate -> Math.abs(candidate.getLat() - target.getLat()) < locDiff &&
+                Math.abs(candidate.getLng() - target.getLng()) < locDiff)
+            .anyMatch(candidate -> similarity.apply(candidate.getName(), target.getName()) >= nameDiff);
       }
     }
 
@@ -91,5 +95,4 @@ public class DataPatchService {
      dbIds.removeAll(newIds);
      if(!dbIds.isEmpty()) hospitalRepository.deleteAllById(dbIds.stream().toList());
   }
-
 }

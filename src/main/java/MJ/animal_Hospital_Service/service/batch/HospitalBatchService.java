@@ -13,7 +13,7 @@ public class HospitalBatchService {
   private final ApiService apiService;
   private final DataPatchService dataPatchService;
 
-  @Scheduled(cron = "0 0 0 * * *")
+  @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
   public void batch(){
     dataPatchService.updateHospitals(apiService.getApi());
   }
