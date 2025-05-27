@@ -1,7 +1,9 @@
 package MJ.animal_Hospital_Service.controller;
 
 import MJ.animal_Hospital_Service.dto.CurrentLoc;
+import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.service.location.LocationService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -23,8 +25,12 @@ public class CurrentLocController {
   String url;
 
   @GetMapping
-  public ResponseEntity<CurrentLoc> getLoc(){
-    return restTemplate.exchange(url, HttpMethod.GET,
-        new HttpEntity<>(locationService.getLocation()), CurrentLoc.class);
+  public ResponseEntity<List<HospitalDto>> getCurrLocNearHospitals(){
+    CurrentLoc loc = restTemplate.exchange(url, HttpMethod.GET,
+        new HttpEntity<>(locationService.getLocation()), CurrentLoc.class).getBody();
+
+    if(loc == null) return ResponseEntity.internalServerError().build();
+
+    return ResponseEntity.ok().body(locationService.findCloseHospitals(loc));
   }
 }
