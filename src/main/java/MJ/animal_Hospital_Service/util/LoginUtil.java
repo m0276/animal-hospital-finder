@@ -23,6 +23,13 @@ public class LoginUtil {
       return userDetails.getUsername();
     }
 
+    if (principal instanceof String username) {
+      if (!username.equalsIgnoreCase("anonymousUser")) {
+        return username;
+      }
+    }
+
+
     throw new IllegalStateException("현재 로그인된 사용자가 없습니다.");
   }
 }
