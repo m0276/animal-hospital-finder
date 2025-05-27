@@ -86,19 +86,12 @@ class FavoriteServiceTest {
   @Test
   @DisplayName("즐겨찾기 추가")
   void saveOrDelete_save() {
-    Hospital hospital = Hospital.builder()
-        .locationId("1")
-        .roadAddressName("hogukro")
-        .x(111111.445)
-        .y(1234.21345)
-        .build();
-
     given(favoriteRepository.findByUserId(any(Long.class))).willReturn(Collections.emptyList());
     given(favoriteRepository.save(any(Favorite.class)))
         .willAnswer(invocation -> invocation.getArgument(0));
 
 
-    favoriteService.saveOrDelete(hospital.getLocationId());
+    favoriteService.saveOrDelete("1");
 
     verify(favoriteRepository,times(1)).save(any(Favorite.class));
   }
@@ -106,18 +99,12 @@ class FavoriteServiceTest {
   @Test
   @DisplayName("즐겨찾기 삭제")
   void saveOrDelete_delete() {
-    Hospital hospital = Hospital.builder()
-        .locationId("1")
-        .roadAddressName("hogukro")
-        .x(111111.445)
-        .y(1234.21345)
-        .build();
     Favorite favorite = new Favorite(1L,1L,"1");
 
     given(favoriteRepository.findByUserId(any(Long.class))).willReturn(List.of(favorite));
     doNothing().when(favoriteRepository).deleteByHospitalIdAndUserId(anyString(),anyLong());
 
-    favoriteService.saveOrDelete(hospital.getLocationId());
+    favoriteService.saveOrDelete("1");
 
     verify(favoriteRepository,times(1))
         .deleteByHospitalIdAndUserId(anyString(),anyLong());
