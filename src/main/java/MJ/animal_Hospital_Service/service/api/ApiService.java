@@ -97,8 +97,8 @@ public class ApiService {
 
         HospitalDto loc = new HospitalDto();
         loc.setPlace_name((String) place.get("name"));
-        loc.setX((String) location.get("lat"));
-        loc.setY((String) location.get("lng"));
+        loc.setX((String) location.get("lng"));
+        loc.setY((String) location.get("lat"));
 
         results.add(loc);
       }

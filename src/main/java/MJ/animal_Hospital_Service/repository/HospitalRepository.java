@@ -1,6 +1,7 @@
 package MJ.animal_Hospital_Service.repository;
 
 import MJ.animal_Hospital_Service.domain.Hospital;
+import io.lettuce.core.dynamic.annotation.Param;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -17,5 +18,5 @@ public interface HospitalRepository extends JpaRepository<Hospital, String> {
       value = "SELECT * FROM hospital WHERE ST_Distance_Sphere(loc, POINT(?1, ?2)) <= 5000",
       nativeQuery = true
   )
-  List<Hospital> findAllByLoc(double x, double y);
+  List<Hospital> findAllByLoc(@Param("x")double x, @Param("y") double y);
 }
