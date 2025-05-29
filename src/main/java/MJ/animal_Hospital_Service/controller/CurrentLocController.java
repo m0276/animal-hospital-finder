@@ -33,4 +33,10 @@ public class CurrentLocController {
 
     return ResponseEntity.ok().body(locationService.findCloseHospitals(loc));
   }
+
+  @GetMapping("/curr")
+  public ResponseEntity<CurrentLoc> getCurrLoc(){
+    return restTemplate.exchange(url, HttpMethod.GET,
+        new HttpEntity<>(locationService.getLocation()), CurrentLoc.class);
+  }
 }

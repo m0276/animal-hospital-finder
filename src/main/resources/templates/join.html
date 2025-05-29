@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    form {
+      width: 300px;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 48%;
+      padding: 10px;
+      margin-right: 2%;
+    }
+  </style>
+</head>
+<body>
+
+<h2>회원가입</h2>
+
+<form id="signupForm">
+  <label for="name"></label><input type="text" id="name" placeholder="이름" required />
+  <label for="password"></label><input type="password" id="password" placeholder="비밀번호" required />
+</form>
+
+<div>
+  <button onclick="handleSignup('USER')">일반 유저 가입</button>
+  <button onclick="handleSignup('HOSPITAL')">병원 회원 가입</button>
+</div>
+
+<script>
+  function getFormData() {
+    return {
+      name: document.getElementById('name').value,
+      password: document.getElementById('password').value
+    };
+  }
+
+  async function handleSignup(role) {
+    const formData = getFormData();
+    const url = role === 'HOSPITAL' ? '/api/user/hospital' : '/api/user';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      alert('회원가입 성공!');
+      window.location.href = '/login';
+    } catch (err) {
+      alert('회원가입 실패: ' + err.message);
+    }
+  }
+</script>
+</body>
+</html>
