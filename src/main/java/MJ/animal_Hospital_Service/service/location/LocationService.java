@@ -3,11 +3,8 @@ package MJ.animal_Hospital_Service.service.location;
 import MJ.animal_Hospital_Service.dto.CurrentLoc;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.service.hospital.HospitalService;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.crypto.Mac;
@@ -25,61 +22,60 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class LocationService {
   private final HospitalService hospitalService;
-  @Value("{api_access_key}")
-  String access;
 
-  @Value("geo_api_secret_key")
-  String secrete;
+  @Value("${api_access_key}")
+  private String access;
 
-  @Value("{geo_loc_request_url}")
-  String url;
+  @Value("${geo_api_secret_key}")
+  private String secret;
 
+  @Value("${geo_loc_request_url}")
+  private String baseUrl;
 
-  public List<HospitalDto> findCloseHospitals(CurrentLoc currentLoc){
+  private final RestTemplate restTemplate = new RestTemplate();
+
+  public List<HospitalDto> findCloseHospitals(CurrentLoc currentLoc) {
     String x = currentLoc.getLat();
     String y = currentLoc.get_long();
-    return hospitalService.findInRangeHospital(x,y);
+    return hospitalService.findInRangeHospital(x, y);
   }
 
-  private String makeSignature(String method, String url, String timestamp, String accessKey, String secretKey) throws Exception {
-    String space = " ";
-    String newLine = "\n";
+  public CurrentLoc getCurrentLocation(String clientIp) {
+    try {
+      String apiPath = "/geolocation/v2/geoLocation";
+      String fullUrl = baseUrl + apiPath + "?ip=" + clientIp + "&ext=t&responseFormat=json";
+      String timestamp = String.valueOf(System.currentTimeMillis());
 
-    String message = new StringBuilder()
-        .append(method)
-        .append(space)
-        .append(url)
-        .append(newLine)
-        .append(timestamp)
-        .append(newLine)
-        .append(accessKey)
-        .toString();
+      HttpHeaders headers = new HttpHeaders();
+      headers.add("x-ncp-apigw-timestamp", timestamp);
+      headers.add("x-ncp-iam-access-key", access);
+      headers.add("x-ncp-apigw-signature-v2",
+          makeSignature(apiPath, timestamp, access, secret));
+
+      HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+      ResponseEntity<Map> response = restTemplate.exchange(fullUrl, HttpMethod.GET, httpEntity, Map.class);
+
+      Map<String, Object> location = (Map<String, Object>) response.getBody().get("location");
+      String lat = location.get("lat").toString();
+      String lon = location.get("lng").toString();
+      CurrentLoc loc = new CurrentLoc();
+      loc.setLat(lat);
+      loc.set_long(lon);
+      return loc;
+
+    } catch (Exception e) {
+      throw new RuntimeException("위치 정보를 가져오는 중 오류 발생: " + e.getMessage());
+    }
+  }
+
+  private String makeSignature(String url, String timestamp, String accessKey, String secretKey) throws Exception {
+    String message = "GET" + " " + url + "\n" + timestamp + "\n" + accessKey;
 
     SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     Mac mac = Mac.getInstance("HmacSHA256");
     mac.init(signingKey);
 
     byte[] rawHmac = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
-
     return Base64.getEncoder().encodeToString(rawHmac);
   }
-
-  public HttpHeaders getLocation(){
-    try {
-      HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.add("x-ncp-apigw-timestamp",
-          String.valueOf(System.currentTimeMillis()));
-      httpHeaders.add("x-ncp-iam-access-key",access);
-      httpHeaders.add("x-ncp-apigw-signature-v2",
-          makeSignature(HttpMethod.GET.toString(),url,Instant.now().toString(),access,secrete));
-
-      return httpHeaders;
-
-
-    } catch (Exception e) {
-      throw new RuntimeException("현재 위치를 불러오던 도중 오류가 발생했습니다.");
-    }
-  }
-
-
 }

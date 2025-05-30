@@ -3,6 +3,7 @@ package MJ.animal_Hospital_Service.controller;
 import MJ.animal_Hospital_Service.dto.CurrentLoc;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.service.location.LocationService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,18 +26,28 @@ public class CurrentLocController {
   String url;
 
   @GetMapping
-  public ResponseEntity<List<HospitalDto>> getCurrLocNearHospitals(){
-    CurrentLoc loc = restTemplate.exchange(url, HttpMethod.GET,
-        new HttpEntity<>(locationService.getLocation()), CurrentLoc.class).getBody();
+  public ResponseEntity<List<HospitalDto>> getCurrLocNearHospitals(HttpServletRequest request){
+    String clientIp = request.getHeader("X-Forwarded-For");
+    if (clientIp == null || clientIp.isEmpty()) {
+      clientIp = request.getRemoteAddr();
+    }
 
-    if(loc == null) return ResponseEntity.internalServerError().build();
+    CurrentLoc loc = locationService.getCurrentLocation(clientIp);
+    if (loc == null) {
+      return ResponseEntity.internalServerError().build();
+    }
 
-    return ResponseEntity.ok().body(locationService.findCloseHospitals(loc));
+    List<HospitalDto> hospitals = locationService.findCloseHospitals(loc);
+    return ResponseEntity.ok(hospitals);
   }
 
   @GetMapping("/curr")
-  public ResponseEntity<CurrentLoc> getCurrLoc(){
-    return restTemplate.exchange(url, HttpMethod.GET,
-        new HttpEntity<>(locationService.getLocation()), CurrentLoc.class);
+  public ResponseEntity<CurrentLoc> getLocation(HttpServletRequest request) {
+    String clientIp = request.getHeader("X-Forwarded-For");
+    if (clientIp == null) {
+      clientIp = request.getRemoteAddr();
+    }
+    CurrentLoc loc = locationService.getCurrentLocation(clientIp);
+    return ResponseEntity.ok(loc);
   }
 }

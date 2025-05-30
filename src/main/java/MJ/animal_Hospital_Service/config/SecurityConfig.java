@@ -32,7 +32,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()
             .requestMatchers("/").permitAll()
-            .anyRequest().authenticated())
+            .anyRequest().permitAll())
         .formLogin(login -> login.defaultSuccessUrl("/"))
         .logout(logout -> logout.logoutSuccessUrl("/")
             .invalidateHttpSession(true)

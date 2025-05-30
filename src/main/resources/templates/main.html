@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
   <title>주변 병원 확인하기</title>
   <style>
+    /* 기존 스타일 유지 */
     #container {
       display: flex;
       flex-direction: row;
@@ -39,8 +40,6 @@
       cursor: pointer;
       margin-left: 10px;
     }
-
-    /* ✅ 태그 디자인 */
     .tag-container {
       margin-top: 6px;
       display: flex;
@@ -62,7 +61,6 @@
       color: #aaa;
       border-style: dashed;
     }
-
     .modal {
       display: none;
       position: fixed;
@@ -109,9 +107,19 @@
     <div id="modalBody"></div>
   </div>
 </div>
+<script th:inline="javascript">
+  const JS_KEY = /*[[${javascriptKey}]]*/ "";
+</script>
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=[[${javascriptKey}]]"></script>
 <script>
+  // Kakao SDK 동적 로드
+  function loadKakaoSDK(appkey, callback) {
+    const script = document.createElement("script");
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false`;
+    script.onload = callback;
+    document.head.appendChild(script);
+  }
+
   let map;
   let modalFavoriteIcon = null;
 
@@ -194,7 +202,6 @@
       header.className = "hospital-header";
 
       const info = document.createElement("div");
-
 
       const tagHTML = [pos.tag, pos.tag2, pos.tag3]
       .filter(Boolean)
@@ -295,7 +302,18 @@
     if (event.target === modal) closeModal();
   };
 
-  window.onload = initMap;
+  // Kakao SDK 로드 후 지도 초기화
+  window.onload = () => {
+    if (!JS_KEY || JS_KEY.trim() === "") {
+      alert("JS_KEY가 설정되어 있지 않습니다.");
+      return;
+    }
+    loadKakaoSDK(JS_KEY, () => {
+      kakao.maps.load(() => {
+        initMap();
+      });
+    });
+  };
 </script>
 </body>
 </html>
