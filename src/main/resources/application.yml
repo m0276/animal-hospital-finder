@@ -4,6 +4,7 @@ spring:
 
   jpa:
     properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
       hibernate.jdbc.batch_size: 1000
       hibernate.order_inserts: true
       hibernate.order_updates: true
@@ -19,4 +20,5 @@ spring:
     name: "animal_hospital_db"
     username: ${username}
     password: ${password}
-    url: "jdbc:mysql://mysql:3306/animal_hospital_db?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC"
+    url: "jdbc:mysql://localhost:3306/animal_hospital_db?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC"
+    #mysql:3306

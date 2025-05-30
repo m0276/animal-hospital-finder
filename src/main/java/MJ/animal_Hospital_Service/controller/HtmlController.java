@@ -22,4 +22,13 @@ public class HtmlController {
     return "main";
   }
 
+  @GetMapping("/kakao")
+  public String goKLogin() {
+    return "redirect:/oauth/kakao";
+  }
+
+  @GetMapping("/naver")
+  public String goNLogin() {
+    return "redirect:/oauth/naver";
+  }
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ public class User {
   @Column(nullable = false)
   String password;
 
+  @Transient
   @Enumerated(EnumType.STRING) @ElementCollection(fetch = FetchType.EAGER)
   Set<Role> roles = new HashSet<>();
 

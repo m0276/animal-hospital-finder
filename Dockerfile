@@ -14,7 +14,7 @@ FROM amazoncorretto:21
 
 WORKDIR /app
 
-ENV PROJECT_NAME=animap_hospital_service
+ENV PROJECT_NAME=animal_Hospital_Service
 ENV PROJECT_VERSION=0.0.1-SNAPSHOT
 ENV JVM_OPTIONS="-Xms512m -Xmx1024m -XX:+UseG1GC"
 

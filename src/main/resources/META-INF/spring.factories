@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+MJ.animal_Hospital_Service.config.DotenvEnvironmentPostProcessor
