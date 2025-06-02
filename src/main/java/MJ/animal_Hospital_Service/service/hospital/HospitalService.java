@@ -57,6 +57,7 @@ public class HospitalService {
 
   public List<HospitalDto> findInRangeHospital(String x, String y){
     List<Hospital> list = hospitalRepository.findAllByLoc(Double.parseDouble(x),Double.parseDouble(y));
+
     List<HospitalDto> result = new ArrayList<>();
     for(Hospital h : list){
       result.add(hospitalMapper.toDto(h));

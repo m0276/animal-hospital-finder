@@ -139,9 +139,9 @@
       alert("현재 위치 정보를 불러올 수 없습니다.");
       return;
     }
-
     const currLat = Number(curr.lat);
-    const currLong = Number(curr._long);
+    const currLong = Number(curr.long);
+
 
     const mapContainer = document.getElementById('map');
     const mapOption = {

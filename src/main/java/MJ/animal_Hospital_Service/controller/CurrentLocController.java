@@ -20,32 +20,28 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/loc")
 public class CurrentLocController {
   private final LocationService locationService;
-  private final RestTemplate restTemplate = new RestTemplate();
-
-  @Value("{geo_loc_request_url}")
-  String url;
 
   @GetMapping
   public ResponseEntity<List<HospitalDto>> getCurrLocNearHospitals(HttpServletRequest request){
-    String clientIp = request.getHeader("X-Forwarded-For");
-    if (clientIp == null || clientIp.isEmpty()) {
-      clientIp = request.getRemoteAddr();
-    }
-
+    String clientIp = locationService.extractClientIp(request);
     CurrentLoc loc = locationService.getCurrentLocation(clientIp);
     if (loc == null) {
       return ResponseEntity.internalServerError().build();
     }
 
     List<HospitalDto> hospitals = locationService.findCloseHospitals(loc);
+
     return ResponseEntity.ok(hospitals);
   }
 
   @GetMapping("/curr")
   public ResponseEntity<CurrentLoc> getLocation(HttpServletRequest request) {
-    String clientIp = request.getHeader("X-Forwarded-For");
-    if (clientIp == null) {
+    String clientIp = locationService.extractClientIp(request);
+    if (clientIp == null || clientIp.isEmpty()) {
       clientIp = request.getRemoteAddr();
+    }
+    if ("0:0:0:0:0:0:0:1".equals(clientIp) || "::1".equals(clientIp)) {
+      clientIp = "39.118.137.94";
     }
     CurrentLoc loc = locationService.getCurrentLocation(clientIp);
     return ResponseEntity.ok(loc);
