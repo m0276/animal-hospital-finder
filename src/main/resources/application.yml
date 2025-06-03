@@ -22,17 +22,17 @@ spring:
     password: ${password}
     url: "jdbc:mysql://localhost:3306/animal_hospital_db?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC"
     #mysql:3306
-
-
-
-
-logging:
-  level:
-    MJ:
-      animal_Hospital_Service: DEBUG
-    org:
-      springframework:
-        web:
-          nodeValue: DEBUG
-          client:
-            RestTemplate: DEBUG
+#
+#
+#
+#
+#logging:
+#  level:
+#    MJ:
+#      animal_Hospital_Service: DEBUG
+#    org:
+#      springframework:
+#        web:
+#          nodeValue: DEBUG
+#          client:
+#            RestTemplate: DEBUG

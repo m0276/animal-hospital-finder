@@ -2,10 +2,15 @@ package MJ.animal_Hospital_Service.service.data;
 
 import MJ.animal_Hospital_Service.domain.Hospital;
 import MJ.animal_Hospital_Service.domain.HospitalKey;
+import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.repository.HospitalRepository;
 import MJ.animal_Hospital_Service.service.api.ApiService;
 
+import MJ.animal_Hospital_Service.service.hospital.HospitalMapper;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,79 +23,49 @@ import org.springframework.stereotype.Component;
 public class DataPatchService {
 
   private final ApiService apiService;
+  private final HospitalMapper hospitalMapper;
   private final HospitalRepository hospitalRepository;
 
-  public void updateHospitals(List<Hospital> hospitals) {
+  public void updateHospitals() {
+    List<Set<HospitalDto>> setList = apiService.searchHospitals();
+    @NotNull Set<HospitalDto> unique = setList.getFirst();
+    @NotNull Set<HospitalDto> allDay =  setList.get(1);
+    @NotNull Set<HospitalDto> small =  setList.getLast();
 
-    class HospitalMatcher {
+    Map<HospitalKey, Hospital> hospitalMap = new HashMap<>();
 
-      final double nameDiff = 0.9;
-      final double locDiff =  0.0005;
-
-      private final JaroWinklerSimilarity similarity = new JaroWinklerSimilarity();
-
-      boolean matches(Set<HospitalKey> candidates, HospitalKey target) {
-//        return candidates.stream().anyMatch(candidate -> {
-//          double score = similarity.apply(candidate.getName(), target.getName());
-//          boolean close = Math.abs(candidate.getLat() - target.getLat()) < locDiff &&
-//              Math.abs(candidate.getLng() - target.getLng()) < locDiff;
-//          return score >= nameDiff && close;
-//        });
-        return candidates.stream()
-            .filter(candidate -> Math.abs(candidate.getLat() - target.getLat()) < locDiff &&
-                Math.abs(candidate.getLng() - target.getLng()) < locDiff)
-            .anyMatch(candidate -> similarity.apply(candidate.getName(), target.getName()) >= nameDiff);
-      }
+    for (HospitalDto dto : unique) {
+      HospitalKey key = new HospitalKey(dto.getName(), dto.getLat(), dto.getLng());
+      Hospital hospital = hospitalMap.getOrDefault(key, hospitalMapper.toEntity(dto));
+      hospital.addTag("특수동물");
+      hospitalMap.put(key, hospital);
     }
 
-    HospitalMatcher matcher = new HospitalMatcher();
-
-    @NotNull Set<HospitalKey> unique = apiService.searchHospitals("특수동물").stream().map(
-            dto -> new HospitalKey(dto.getPlace_name(), Double.parseDouble(dto.getX()),
-                Double.parseDouble(dto.getY())))
-        .collect(Collectors.toSet());
-    @NotNull Set<HospitalKey> allDay = apiService.searchHospitals("24시간 진료").stream().map(
-            dto -> new HospitalKey(dto.getPlace_name(), Double.parseDouble(dto.getX()),
-                Double.parseDouble(dto.getY())))
-        .collect(Collectors.toSet());
-    @NotNull Set<HospitalKey> small = apiService.searchHospitals("소동물").stream().map(
-            dto -> new HospitalKey(dto.getPlace_name(), Double.parseDouble(dto.getX()),
-                Double.parseDouble(dto.getY())))
-        .collect(Collectors.toSet());
-
-    for (Hospital hospital : hospitals) {
-      HospitalKey key = new HospitalKey(hospital.getPlaceName(), hospital.getX(), hospital.getY());
-
-      if (matcher.matches(unique,key)) {
-        hospital.setTag("특수동물");
-      }
-
-      if (matcher.matches(allDay,key)) {
-        if (hospital.getTag() != null)
-          hospital.setTag2("24시간");
-        else
-          hospital.setTag("24시간");
-      }
-
-      if (matcher.matches(small,key)) {
-        if (hospital.getTag() == null)
-          hospital.setTag("소동물");
-        else if (hospital.getTag2() == null)
-          hospital.setTag2("소동물");
-        else
-          hospital.setTag3("소동물");
-      }
+    for (HospitalDto dto : allDay) {
+      HospitalKey key = new HospitalKey(dto.getName(), dto.getLat(), dto.getLng());
+      Hospital hospital = hospitalMap.getOrDefault(key, hospitalMapper.toEntity(dto));
+      hospital.addTag("24시간");
+      hospitalMap.put(key, hospital);
     }
 
-    hospitalRepository.saveAll(hospitals);
-    deleteHospitals();
+    for (HospitalDto dto : small) {
+      HospitalKey key = new HospitalKey(dto.getName(), dto.getLat(), dto.getLng());
+      Hospital hospital = hospitalMap.getOrDefault(key, hospitalMapper.toEntity(dto));
+      hospital.addTag("소동물");
+      hospitalMap.put(key, hospital);
+    }
+
+    List<Hospital> hospitalList = hospitalMap.values().stream().toList();
+
+    hospitalRepository.saveAll(hospitalList);
+    deleteHospitals(hospitalList);
   }
 
-  private void deleteHospitals(){
+  private void deleteHospitals(List<Hospital> list){
      Set<String> dbIds = hospitalRepository.findAllLocationIds();
 
-     Set<String> newIds = apiService.getApi().stream()
-         .map(Hospital::getLocationId).collect(Collectors.toSet());
+     Set<String> newIds = list.stream().map(Hospital::getLocationId)
+         .collect(Collectors.toSet());
 
      dbIds.removeAll(newIds);
      if(!dbIds.isEmpty()) hospitalRepository.deleteAllById(dbIds.stream().toList());

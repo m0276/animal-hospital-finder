@@ -60,4 +60,16 @@ public class Hospital {
     this.tag3 = tag3;
   }
 
+  public void addTag(String newTag) {
+    if (newTag == null) return;
+
+    if (newTag.equals(tag) || newTag.equals(tag2) || newTag.equals(tag3)) {
+      return; // 이미 같은 태그 존재
+    }
+
+    if (tag == null) tag = newTag;
+    else if (tag2 == null) tag2 = newTag;
+    else if (tag3 == null) tag3 = newTag;
+  }
+
 }

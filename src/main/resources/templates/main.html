@@ -123,16 +123,6 @@
   let map;
   let modalFavoriteIcon = null;
 
-  // async function loadData() {
-  //   try {
-  //     const response = await fetch("/api/loc/curr");
-  //     return await response.json();
-  //   } catch (error) {
-  //     console.error("API 오류:", error);
-  //     return null;
-  //   }
-  // }
-
   async function initMap() {
     const curr = await loadLocation();
     if (!curr) {

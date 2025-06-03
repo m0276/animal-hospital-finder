@@ -10,12 +10,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class HospitalBatchService {
 
-  private final ApiService apiService;
   private final DataPatchService dataPatchService;
 
-  @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+  @Scheduled(cron = "0 0 0 * * Mon", zone = "Asia/Seoul")
   public void batch(){
-    dataPatchService.updateHospitals(apiService.getApi());
+    dataPatchService.updateHospitals();
   }
 
 }
