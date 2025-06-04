@@ -2,6 +2,7 @@ package MJ.animal_Hospital_Service.service.location;
 
 import MJ.animal_Hospital_Service.dto.CurrentLoc;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
+import MJ.animal_Hospital_Service.service.data.DataPatchService;
 import MJ.animal_Hospital_Service.service.hospital.HospitalService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -126,5 +127,11 @@ public class LocationService {
       ip = "39.118.137.94";
     }
     return ip;
+  }
+
+  private final DataPatchService dataPatchService;
+
+  public void currLocSet(String lat, String lng){
+    dataPatchService.currLoc(lat,lng);
   }
 }

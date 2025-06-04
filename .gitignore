@@ -42,3 +42,5 @@ application-dev.yml
 
 .dockerIgnore
 /src/main/resources/private.sql
+
+build

@@ -2,6 +2,7 @@ package MJ.animal_Hospital_Service.controller;
 
 import MJ.animal_Hospital_Service.dto.CurrentLoc;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
+import MJ.animal_Hospital_Service.service.api.ApiService;
 import MJ.animal_Hospital_Service.service.location.LocationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,16 @@ public class CurrentLocController {
       CurrentLoc loc = locationService.getCurrentLocation(clientIp);
       return ResponseEntity.ok(loc);
     } catch (Exception e) {
+      return ResponseEntity.internalServerError().build();
+    }
+  }
+
+  @PostMapping("/near")
+  public ResponseEntity<Void> getLoc(@RequestParam String lat , @RequestParam String lng){
+    try{
+      locationService.currLocSet(lat,lng);
+      return ResponseEntity.ok().build();
+    } catch (Exception e){
       return ResponseEntity.internalServerError().build();
     }
   }

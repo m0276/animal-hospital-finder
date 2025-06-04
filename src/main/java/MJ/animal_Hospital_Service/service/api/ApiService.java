@@ -1,12 +1,17 @@
 package MJ.animal_Hospital_Service.service.api;
 
 
+import MJ.animal_Hospital_Service.controller.CurrentLocController;
 import MJ.animal_Hospital_Service.domain.Hospital;
+import MJ.animal_Hospital_Service.dto.CurrentLoc;
 import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.service.hospital.HospitalMapper;
+import MJ.animal_Hospital_Service.service.location.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -14,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -85,42 +91,57 @@ public class ApiService {
 //    return Collections.emptyList();
 //  }
 
-  public List<Set<HospitalDto>> searchHospitals() {
-    List<String> keywords = List.of("특수동물","24시간","소동물");
-    List<Set<HospitalDto>> result = new ArrayList<>();
-    for (String keyword : keywords) {
+public List<Set<HospitalDto>> searchHospitals(String lat, String lng) {
+  List<String> keywords = List.of("특수동물", "24시간", "소동물");
+  List<Set<HospitalDto>> resultsPerKeyword = new ArrayList<>();
 
-      String url = UriComponentsBuilder
-          .fromHttpUrl("https://maps.googleapis.com/maps/api/place/textsearch/json")
-          .queryParam("query", keyword)
-          .queryParam("region", "KR")
-          .queryParam("key", googleKey)
-          .toUriString();
+  for (String keyword : keywords) {
+    Set<HospitalDto> keywordResults = new HashSet<>();
+    String pageToken = null;
 
-      ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+    do {
+      try {
+        UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl("https://maps.googleapis.com/maps/api/place/textsearch/json")
+            .queryParam("query", keyword)
+            .queryParam("location",lat+","+lng)
+            .queryParam("radius","50000")
+            .queryParam("region", "KR")
+            .queryParam("key", googleKey);
 
-      List<HospitalDto> results = new ArrayList<>();
-      if (response.getStatusCode() == HttpStatus.OK) {
-        List<Map<String, Object>> places = (List<Map<String, Object>>) response.getBody()
-            .get("results");
-
-        for (Map<String, Object> place : places) {
-          Map<String, Object> geometry = (Map<String, Object>) place.get("geometry");
-          Map<String, Object> location = (Map<String, Object>) geometry.get("location");
-
-          HospitalDto loc = new HospitalDto();
-          loc.setName((String) place.get("name"));
-          loc.setLat((Double) location.get("lat"));
-          loc.setLng((Double) location.get("lng"));
-
-          results.add(loc);
+        if (pageToken != null) {
+          builder.queryParam("pagetoken", pageToken);
+          Thread.sleep(2500);
         }
+
+        String url = builder.toUriString();
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        System.out.println(response.toString());
+        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) break;
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode resultsNode = root.path("results");
+
+        if (resultsNode.isArray()) {
+          for (JsonNode placeNode : resultsNode) {
+            HospitalDto dto = objectMapper.treeToValue(placeNode, HospitalDto.class);
+            keywordResults.add(dto);
+          }
+        }
+
+        pageToken = root.has("next_page_token") ? root.get("next_page_token").asText() : null;
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        break;
       }
 
-      result.add(new HashSet<>(results));
-    }
+    } while (pageToken != null);
 
-    return result;
+    resultsPerKeyword.add(keywordResults);
   }
+
+  return resultsPerKeyword;
+}
 
 }
