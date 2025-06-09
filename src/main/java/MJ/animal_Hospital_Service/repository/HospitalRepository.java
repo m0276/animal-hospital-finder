@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface HospitalRepository extends JpaRepository<Hospital, String> {
-  @Query("SELECT h.locationId FROM Hospital h")
+  @Query("SELECT h.placeId FROM Hospital h")
   Set<String> findAllLocationIds();
 
   @Query(
@@ -19,4 +19,5 @@ public interface HospitalRepository extends JpaRepository<Hospital, String> {
       nativeQuery = true
   )
   List<Hospital> findAllByLoc(@Param("x")double x, @Param("y") double y);
+
 }

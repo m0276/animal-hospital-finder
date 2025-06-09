@@ -9,21 +9,20 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 public interface HospitalMapper {
 
-  @Mapping(target = "lat", source = "x")
-  @Mapping(target = "lng", source = "y")
+
+  @Mapping(source = "placeId", target = "placeId")
+  @Mapping(source = "formattedAddress", target = "formattedAddress")
+  @Mapping(source = "lat", target = "lat")
+  @Mapping(source = "lng", target = "lng")
+  @Mapping(source = "nationalPhoneNumber", target = "nationalPhoneNumber")
+  @Mapping(source = "name", target = "name")
   HospitalDto toDto(Hospital hospital);
 
-  @Mapping(target = "x", source = "lat")
-  @Mapping(target = "y", source = "lng")
+  @Mapping(source = "placeId", target = "placeId")
+  @Mapping(source = "formattedAddress", target = "formattedAddress")
+  @Mapping(source = "lat", target = "lat")
+  @Mapping(source = "lng", target = "lng")
+  @Mapping(source = "nationalPhoneNumber", target = "nationalPhoneNumber")
+  @Mapping(source = "name", target = "name")
   Hospital toEntity(HospitalDto dto);
-//
-//  @Named("doubleToString")
-//  static String doubleToString(Double value) {
-//    return value != null ? value.toString() : null;
-//  }
-//
-//  @Named("stringToDouble")
-//  static Double stringToDouble(String value) {
-//    return value != null ? Double.parseDouble(value) : null;
-//  }
 }

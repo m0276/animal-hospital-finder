@@ -39,14 +39,4 @@ public class CurrentLocController {
       return ResponseEntity.internalServerError().build();
     }
   }
-
-  @PostMapping("/near")
-  public ResponseEntity<Void> getLoc(@RequestParam String lat , @RequestParam String lng){
-    try{
-      locationService.currLocSet(lat,lng);
-      return ResponseEntity.ok().build();
-    } catch (Exception e){
-      return ResponseEntity.internalServerError().build();
-    }
-  }
 }

@@ -2,6 +2,7 @@ package MJ.animal_Hospital_Service.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,27 +10,20 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HospitalDto {
-//  String location_id;
-//  String place_name;
-//  String phone;
-//  String address_name;
-//  String road_address_name;
-//  String x;
-//  String y;
-//  String place_url;
   private String name;
-
   @JsonProperty("formatted_address")
   private String formattedAddress;
   private double lat;
   private double lng;
-  @JsonProperty("place_id")
+  @JsonProperty("id")
   private String placeId;
   private double rating;
   private boolean openNow;
   private String tag;
   private String tag2;
   private String tag3;
+
+  private String nationalPhoneNumber;
 
   @JsonProperty("geometry")
   private void unpackGeometry(Map<String, Object> geometry) {
@@ -44,4 +38,5 @@ public class HospitalDto {
       this.openNow = (Boolean) openingHours.get("open_now");
     }
   }
+
 }

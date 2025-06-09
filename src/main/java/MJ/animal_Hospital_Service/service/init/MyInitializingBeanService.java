@@ -1,5 +1,6 @@
 package MJ.animal_Hospital_Service.service.init;
 
+import MJ.animal_Hospital_Service.repository.HospitalRepository;
 import MJ.animal_Hospital_Service.service.api.ApiService;
 import MJ.animal_Hospital_Service.service.data.DataPatchService;
 import MJ.animal_Hospital_Service.service.user.UserService;
@@ -15,12 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyInitializingBeanService{
   private final DataPatchService dataPatchService;
   private final UserService userService;
-
+  private final HospitalRepository hospitalRepository;
 
   @PostConstruct
   public void init() {
-    userService.findAdmin(); // 관리자 계정 생성
-    dataPatchService.updateHospitals();
+    if(hospitalRepository.findAll().isEmpty()){
+      userService.findAdmin(); // 관리자 계정 생성
+      dataPatchService.updateHospitals();
+    }
   }
 
 }

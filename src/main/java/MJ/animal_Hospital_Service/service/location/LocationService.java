@@ -128,10 +128,4 @@ public class LocationService {
     }
     return ip;
   }
-
-  private final DataPatchService dataPatchService;
-
-  public void currLocSet(String lat, String lng){
-    dataPatchService.currLoc(lat,lng);
-  }
 }
