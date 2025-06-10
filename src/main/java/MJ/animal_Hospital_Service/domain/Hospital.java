@@ -46,8 +46,10 @@ public class Hospital {
   String tag2;
   @Column
   String tag3;
-  @Column(columnDefinition = "POINT", nullable = false) @Setter
+  @Column(columnDefinition = "geometry(Point,4326)", nullable = false)
   Point loc;
+  @Column(name = "open_time")
+  String openTime;
 
   public void setPhone(String phone) {
     this.nationalPhoneNumber = phone;

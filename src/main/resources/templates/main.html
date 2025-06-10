@@ -299,10 +299,10 @@
     const modalBody = document.getElementById("modalBody");
 
     modalBody.innerHTML = `
-      <h2>${hospital.place_name}</h2>
-      <p><strong>주소:</strong> ${hospital.road_address_name || hospital.address_name}</p>
-      <p><strong>전화:</strong> ${hospital.phone || "정보 없음"}</p>
-      <p><strong>홈페이지:</strong> <a href="${hospital.place_url}" target="_blank">바로가기</a></p>
+      <h2>${hospital.name}</h2>
+      <p><strong>주소:</strong> ${hospital.formattedAddress}</p>
+      <p><strong>전화:</strong> ${hospital.nationalPhoneNumber || "정보 없음"}</p>
+      <p><strong>홈페이지:</strong> <a href="${hospital.websiteUri}" target="_blank">바로가기</a></p>
       <p><strong>태그:</strong> ${[hospital.tag, hospital.tag2, hospital.tag3].filter(Boolean).join(", ") || "없음"}</p>
     `;
 

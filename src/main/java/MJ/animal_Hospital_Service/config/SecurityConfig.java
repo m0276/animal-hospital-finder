@@ -23,7 +23,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http  .csrf(csrf -> csrf
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // 클라이언트에서도 접근 가능
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         )
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
@@ -31,7 +31,6 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()
-
             .anyRequest().permitAll())
         .formLogin(login -> login.defaultSuccessUrl("/"))
         .logout(logout -> logout.logoutSuccessUrl("/")

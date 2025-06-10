@@ -16,12 +16,16 @@ public interface HospitalMapper {
   @Mapping(source = "lng", target = "lng")
   @Mapping(source = "nationalPhoneNumber", target = "nationalPhoneNumber")
   @Mapping(source = "name", target = "name")
+  @Mapping(source = "openTime", target = "weekdayDescriptions")
+  @Mapping(source = "placeUrl" , target = "websiteUri")
   HospitalDto toDto(Hospital hospital);
 
   @Mapping(source = "placeId", target = "placeId")
   @Mapping(source = "formattedAddress", target = "formattedAddress")
   @Mapping(source = "lat", target = "lat")
   @Mapping(source = "lng", target = "lng")
+  @Mapping(source = "weekdayDescriptions", target = "openTime")
+  @Mapping(source = "websiteUri", target = "placeUrl")
   @Mapping(source = "nationalPhoneNumber", target = "nationalPhoneNumber")
   @Mapping(source = "name", target = "name")
   Hospital toEntity(HospitalDto dto);
