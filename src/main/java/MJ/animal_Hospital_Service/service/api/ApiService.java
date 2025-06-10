@@ -48,7 +48,7 @@ public class ApiService {
   private String googleKey;
 
 public List<Set<HospitalDto>> searchHospitals() {
-  List<String> keywords = List.of("특수동물", "24시간", "소동물");
+  List<String> keywords = List.of("특수동물", "24시간동물", "소동물");
   List<Set<HospitalDto>> resultsPerKeyword = new ArrayList<>();
 
   for (String keyword : keywords) {
@@ -57,7 +57,7 @@ public List<Set<HospitalDto>> searchHospitals() {
       try {
         String url = "https://places.googleapis.com/v1/places:searchText";
         Map<String, Object> requestBody = Map.of(
-            "textQuery", keyword + ",한국"
+            "textQuery", keyword + "병원,한국"
         );
 
         String requestBodyJson = objectMapper.writeValueAsString(requestBody);

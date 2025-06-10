@@ -235,8 +235,8 @@
       .join(" ");
 
       info.innerHTML = `
-        <strong>${pos.place_name}</strong><br/>
-        ${pos.road_address_name || pos.address_name}
+        <strong>${pos.name}</strong><br/>
+        ${pos.formattedAddress}
         <div class="tag-container">${tagHTML || '<span class="tag-pill empty">태그 없음</span>'}</div>
       `;
 

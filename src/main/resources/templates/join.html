@@ -39,8 +39,8 @@
 </form>
 
 <div>
-  <button onclick="handleSignup('USER')">일반 유저<br>가입</button>
-  <button onclick="handleSignup('HOSPITAL')">병원 회원<br>가입</button>
+  <button onclick="handleSignup('USER')">유저<br>가입</button>
+  <button onclick="handleSignup('HOSPITAL')">병원<br>가입</button>
 </div>
 
 <script>
@@ -54,12 +54,17 @@
   async function handleSignup(role) {
     const formData = getFormData();
     const url = role === 'HOSPITAL' ? '/api/user/hospital' : '/api/user';
+    const csrfToken = getCookie('XSRF-TOKEN');
 
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(formData),
+        credentials: 'include'
       });
 
       if (!res.ok) throw new Error(await res.text());
@@ -69,6 +74,13 @@
     } catch (err) {
       alert('회원가입 실패: ' + err.message);
     }
+  }
+
+  function getCookie(name) {
+    const matches = document.cookie.match(new RegExp(
+        `(?:^|; )${name.replace(/([$?*|{}()\[\]\\/+^])/g, '\\$1')}=([^;]*)`
+    ));
+    return matches ? decodeURIComponent(matches[1]) : null;
   }
 </script>
 </body>
