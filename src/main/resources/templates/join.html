@@ -46,7 +46,7 @@
 <script>
   function getFormData() {
     return {
-      name: document.getElementById('name').value,
+      username: document.getElementById('name').value,
       password: document.getElementById('password').value
     };
   }
@@ -80,7 +80,7 @@
     const matches = document.cookie.match(new RegExp(
         `(?:^|; )${name.replace(/([$?*|{}()\[\]\\/+^])/g, '\\$1')}=([^;]*)`
     ));
-    return matches ? decodeURIComponent(matches[1]) : null;
+    return matches ? decodeURIComponent(matches[1]).trim() : null;
   }
 </script>
 </body>

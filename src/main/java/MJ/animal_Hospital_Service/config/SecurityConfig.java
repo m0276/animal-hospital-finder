@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 public class SecurityConfig {
@@ -24,6 +25,7 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http  .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            .ignoringRequestMatchers( new AntPathRequestMatcher("/api/user", "POST"))
         )
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
@@ -31,6 +33,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()
+            .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
             .anyRequest().permitAll())
         .formLogin(login -> login.defaultSuccessUrl("/"))
         .logout(logout -> logout.logoutSuccessUrl("/")
