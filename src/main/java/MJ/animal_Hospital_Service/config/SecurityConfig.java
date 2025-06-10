@@ -1,12 +1,17 @@
 package MJ.animal_Hospital_Service.config;
 
+import MJ.animal_Hospital_Service.service.login.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -14,6 +19,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
   @Bean
@@ -48,6 +54,20 @@ public class SecurityConfig {
   public WebSecurityCustomizer webSecurityCustomizer(){
     return web -> web.ignoring()
         .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+  }
+
+  private final CustomUserDetailsService userDetailsService;
+
+  @Bean
+  public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+    AuthenticationManagerBuilder authManagerBuilder =
+        http.getSharedObject(AuthenticationManagerBuilder.class);
+
+    authManagerBuilder
+        .userDetailsService(userDetailsService)
+        .passwordEncoder(bCryptPasswordEncoder());
+
+    return authManagerBuilder.build();
   }
 
 }

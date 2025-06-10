@@ -8,6 +8,7 @@ spring:
       hibernate.jdbc.batch_size: 1000
       hibernate.order_inserts: true
       hibernate.order_updates: true
+      hibernate.ddl-auto: update
 
   data:
     redis:
@@ -22,6 +23,7 @@ spring:
     password: ${password}
     url: "jdbc:mysql://localhost:3306/animal_hospital_db?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC"
     #mysql:3306
+
 #
 #
 #

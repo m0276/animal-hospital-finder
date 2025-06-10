@@ -1,6 +1,7 @@
 package MJ.animal_Hospital_Service.domain;
 
 import MJ.animal_Hospital_Service.config.Role;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -10,7 +11,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Transient;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -24,7 +27,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class User  implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
 
@@ -34,8 +40,11 @@ public class User {
   @Column(nullable = false)
   String password;
 
-  @Transient
-  @Enumerated(EnumType.STRING) @ElementCollection(fetch = FetchType.EAGER)
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "roles",
+      joinColumns = @JoinColumn(name = "user_id"))
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role")
   Set<Role> roles = new HashSet<>();
 
   @Column // social login 체크용
