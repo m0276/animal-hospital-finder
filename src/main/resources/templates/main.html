@@ -88,11 +88,16 @@
 <body>
 
 <div class="button-group">
-  <button onclick="location.href='/join'">회원가입</button>
-  <button onclick="location.href='/login'">로그인</button>
+  <div th:if="${#authorization.expression('isAnonymous()')}">
+    <button onclick="location.href='/join'">회원가입</button>
+    <button onclick="location.href='/login'">로그인</button>
+    <button onclick="location.href='/kakao'">카카오 로그인</button>
+    <button onclick="location.href='/naver'">네이버 로그인</button>
+  </div>
+  <div th:unless="${#authorization.expression('isAnonymous()')}">
+    <button onclick="location.href='/logout'">로그아웃</button>
+  </div>
   <button onclick="location.href='/favList'">즐겨찾기 확인</button>
-  <button onclick="location.href='/kakao'">카카오 로그인</button>
-  <button onclick="location.href='/naver'">네이버 로그인</button>
 </div>
 
 <div id="container">
@@ -210,14 +215,14 @@
     list.forEach(pos => {
       pos.favorite = pos.favorite || false;
 
-      const latlng = new kakao.maps.LatLng(Number(pos.y), Number(pos.x));
+      const latlng = new kakao.maps.LatLng(Number(pos.lat), Number(pos.lng));
       const imageSize = new kakao.maps.Size(24, 35);
       const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
 
       const marker = new kakao.maps.Marker({
         map: map,
         position: latlng,
-        title: pos.place_name,
+        title: pos.name,
         image: markerImage
       });
 
@@ -259,10 +264,7 @@
       header.addEventListener("click", () => {
         map.panTo(latlng);
         showModal(pos, favIcon);
-      });
-
-      kakao.maps.event.addListener(marker, "click", () => {
-        showModal(pos, favIcon);
+        map.relayout();
       });
     });
   }
@@ -299,7 +301,7 @@
     const modalBody = document.getElementById("modalBody");
 
     modalBody.innerHTML = `
-      <h2>${hospital.name}</h2>
+      <h2>${hospital.name}</h2><br>
       <p><strong>주소:</strong> ${hospital.formattedAddress}</p>
       <p><strong>전화:</strong> ${hospital.nationalPhoneNumber || "정보 없음"}</p>
       <p><strong>홈페이지:</strong> <a href="${hospital.websiteUri}" target="_blank">바로가기</a></p>

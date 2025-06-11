@@ -61,6 +61,8 @@ dependencies {
 
 	implementation 'org.hibernate.orm:hibernate-spatial:6.4.4.Final'
 	implementation 'org.locationtech.jts:jts-core:1.19.0'
+
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 }
 
 tasks.named('test') {
