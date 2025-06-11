@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommonLoginService {
 
-  private final UserService userService;
-
   public void login(HttpSession session, MJ.animal_Hospital_Service.domain.User user){
 
     session.setAttribute("LOGIN_USER", user);

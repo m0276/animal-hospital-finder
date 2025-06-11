@@ -23,6 +23,10 @@ public class LoginUtil {
       return userDetails.getUsername();
     }
 
+    if (principal instanceof MJ.animal_Hospital_Service.util.UserPrincipal customUser) {
+      return customUser.getUsername();
+    }
+
     if (principal instanceof String username) {
       if (!username.equalsIgnoreCase("anonymousUser")) {
         return username;
