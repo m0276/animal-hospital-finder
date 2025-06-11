@@ -46,50 +46,68 @@ public class ApiService {
 
   @Value("${googleApiKey}")
   private String googleKey;
+  public List<Set<HospitalDto>> searchHospitals() {
+    List<String> keywords = List.of("특수동물", "24시간동물", "소동물");
+    List<Set<HospitalDto>> resultsPerKeyword = new ArrayList<>();
 
-public List<Set<HospitalDto>> searchHospitals() {
-  List<String> keywords = List.of("특수동물", "24시간동물", "소동물");
-  List<Set<HospitalDto>> resultsPerKeyword = new ArrayList<>();
-
-  for (String keyword : keywords) {
-    Set<HospitalDto> keywordResults = new HashSet<>();
+    for (String keyword : keywords) {
+      Set<HospitalDto> keywordResults = new HashSet<>();
 
       try {
         String url = "https://places.googleapis.com/v1/places:searchText";
+
         Map<String, Object> requestBody = Map.of(
             "textQuery", keyword + "병원,한국"
         );
 
-        String requestBodyJson = objectMapper.writeValueAsString(requestBody);
+        String nextPageToken = null;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("X-Goog-Api-Key", googleKey);
-        headers.set("X-Goog-FieldMask", "*");
+        do {
+          String requestBodyJson;
+          if (nextPageToken == null) {
+            requestBodyJson = objectMapper.writeValueAsString(requestBody);
+          } else {
+            requestBodyJson = objectMapper.writeValueAsString(Map.of(
+                "textQuery", keyword + "병원,한국",
+                "pageToken", nextPageToken
+            ));
 
-        HttpEntity<String> http = new HttpEntity<>(requestBodyJson, headers);
-
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, http, String.class);
-
-        JsonNode root = objectMapper.readTree(responseEntity.getBody());
-        JsonNode resultsNode = root.path("places");
-
-        if(resultsNode.isArray()){
-          for(JsonNode node:resultsNode){
-            HospitalDto dto = objectMapper.treeToValue(node, HospitalDto.class);
-            keywordResults.add(dto);
+            Thread.sleep(2000);
           }
-        }
+
+          HttpHeaders headers = new HttpHeaders();
+          headers.setContentType(MediaType.APPLICATION_JSON);
+          headers.set("X-Goog-Api-Key", googleKey);
+          headers.set("X-Goog-FieldMask", "*");
+
+          HttpEntity<String> http = new HttpEntity<>(requestBodyJson, headers);
+
+          ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, http, String.class);
+
+          JsonNode root = objectMapper.readTree(responseEntity.getBody());
+          JsonNode resultsNode = root.path("places");
+
+          if(resultsNode.isArray()){
+            for(JsonNode node : resultsNode){
+              HospitalDto dto = objectMapper.treeToValue(node, HospitalDto.class);
+              keywordResults.add(dto);
+            }
+          }
+
+          nextPageToken = root.has("nextPageToken") ? root.get("nextPageToken").asText(null) : null;
+
+        } while (nextPageToken != null);
+
       } catch (Exception e) {
         e.printStackTrace();
         break;
       }
 
+      resultsPerKeyword.add(keywordResults);
+    }
 
-    resultsPerKeyword.add(keywordResults);
+    return resultsPerKeyword;
   }
 
-  return resultsPerKeyword;
-}
 
 }
