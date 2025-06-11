@@ -37,7 +37,7 @@ public class SecurityConfig {
         )
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
-            .requestMatchers("/api/hospital/**").hasAnyRole("HOSPITAL","ADMIN")
+            .requestMatchers("/api/hospital/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()

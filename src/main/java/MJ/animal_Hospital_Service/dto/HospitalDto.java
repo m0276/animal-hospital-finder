@@ -31,17 +31,32 @@ public class HospitalDto {
     this.lat = (Double) location.get("latitude");
     this.lng = (Double) location.get("longitude");
   }
-
-  @JsonProperty("opening_hours")
-  private void unpackOpeningHours(Map<String, Object> openingHours) {
-    if (openingHours != null && openingHours.get("open_now") != null) {
-      this.openNow = (Boolean) openingHours.get("open_now");
-    }
-  }
+//
+//  @JsonProperty("opening_hours")
+//  private void unpackOpeningHours(Map<String, Object> openingHours) {
+//    if (openingHours != null && openingHours.get("open_now") != null) {
+//      this.openNow = (Boolean) openingHours.get("open_now");
+//    }
+//  }
 
   @JsonProperty("displayName")
   private void getName(Map<String, Object> displayName){
     this.name = (String) displayName.get("text");
+  }
+
+  @JsonProperty("regularOpeningHours")
+  private void getTime(Map<String,Object> opening){
+    this.openNow = (boolean) opening.get("openNow");
+    List<String> openingList = (List<String>) opening.get("weekdayDescriptions");
+    StringBuilder descriptions = new StringBuilder();
+    for(String s : openingList){
+      descriptions.append(s);
+      descriptions.append("\n");
+    }
+
+    descriptions.deleteCharAt(descriptions.length()-1);
+    this.weekdayDescriptions = descriptions.toString();
+
   }
 
 }
