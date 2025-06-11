@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="utf-8" />
   <title>주변 병원 확인하기</title>
   <style>
-    /* 기존 스타일 유지 */
     #container {
       display: flex;
       flex-direction: row;
@@ -83,6 +83,14 @@
       font-size: 20px;
       cursor: pointer;
     }
+
+    .button-group {
+      display: inline-block;
+    }
+    .button-group > button {
+      text-align: center;
+    }
+
   </style>
 </head>
 <body>
@@ -91,13 +99,19 @@
   <div th:if="${#authorization.expression('isAnonymous()')}">
     <button onclick="location.href='/join'">회원가입</button>
     <button onclick="location.href='/login'">로그인</button>
-    <button onclick="location.href='/kakao'">카카오 로그인</button>
-    <button onclick="location.href='/naver'">네이버 로그인</button>
+    <button onclick="location.href='/kakao'"style="padding: 0; border: none; background: none; cursor: pointer;">
+      <img src="/image/kakao_login_medium_narrow.png" alt="카카오 로그인" style="width: auto; height: 26px;" />
+    </button>
+    <button onclick="location.href='/naver'" style="padding: 0; border: none; background: none; cursor: pointer;">
+      <img src="/image/btnG_완성형.png" alt="네이버 로그인" style="width: auto; height: 26px;" />
+    </button>
   </div>
   <div th:unless="${#authorization.expression('isAnonymous()')}">
     <button onclick="location.href='/logout'">로그아웃</button>
+    <button onclick="location.href='/favList'">즐겨찾기 확인</button>
+    <button sec:authorize="hasAuthority('ROLE_HOSPITAL')">병원 태그 수정</button>
+
   </div>
-  <button onclick="location.href='/favList'">즐겨찾기 확인</button>
 </div>
 
 <div id="container">
@@ -284,7 +298,9 @@
     try {
       const res = await fetch("/api/favorite/" + hospital.id, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json",
+          'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')},
         body: JSON.stringify(hospital)
       });
       if (!res.ok) throw new Error(await res.text());
@@ -294,6 +310,13 @@
     } catch (error) {
       alert("즐겨찾기 실패: " + error.message);
     }
+  }
+
+  function getCookie(name) {
+    const matches = document.cookie.match(new RegExp(
+        `(?:^|; )${name.replace(/([$?*|{}()\[\]\\/+^])/g, '\\$1')}=([^;]*)`
+    ));
+    return matches ? decodeURIComponent(matches[1]).trim() : null;
   }
 
   function showModal(hospital, originalIcon) {

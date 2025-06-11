@@ -31,7 +31,7 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http  .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-            .ignoringRequestMatchers( new AntPathRequestMatcher("/api/user", "POST"))
+            .ignoringRequestMatchers( new AntPathRequestMatcher("/api/user/**", "POST"))
         )
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
@@ -39,7 +39,6 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()
-            .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
             .anyRequest().permitAll())
         .formLogin(login -> login.defaultSuccessUrl("/"))
         .logout(logout -> logout.logoutSuccessUrl("/")

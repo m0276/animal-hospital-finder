@@ -159,18 +159,19 @@ public class UserService {
       throw new NoSuchElementException("Failed to parse user info from Kakao", e);
     }
   }
-
+  private long num = 0L;
   public User saveOrUpdateNaverUser(SocialLoginUserInfo userInfo) {
     Optional<User> existing = userRepository.findByTypeAndTypeId("naver",userInfo.getId());
 
     return existing.orElseGet(() -> existing
         .orElseGet(() -> {
           User newUser = User.builder()
-              .username(userInfo.getName())
+              .username(userInfo.getName()+ num)
               .password(encoder.encode("naverUser" + UUID.randomUUID()))
               .type("naver")
               .typeId(userInfo.getId())
               .build();
+          num++;
           return userRepository.save(newUser);
         }));
 
@@ -183,11 +184,12 @@ public class UserService {
     return existing.orElseGet(() -> existing
         .orElseGet(() -> {
           User newUser = User.builder()
-              .username(userInfo.getName())
+              .username(userInfo.getName()+num)
               .password(encoder.encode("kakaoUser" + UUID.randomUUID()))
               .type("kakao")
               .typeId(userInfo.getId())
               .build();
+          num++;
           return userRepository.save(newUser);
         }));
 

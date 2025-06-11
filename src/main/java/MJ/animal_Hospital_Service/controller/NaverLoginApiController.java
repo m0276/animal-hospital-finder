@@ -22,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/oauth")
+@RequestMapping("/oauth/naver")
 public class NaverLoginApiController {
   private final NaverLoginService naverLoginService;
 
@@ -37,13 +37,13 @@ public class NaverLoginApiController {
   }
 
 
-  @GetMapping("/oauth/naver/callback")
+  @GetMapping("/callback")
   public ResponseEntity<String> handleNaverCallback(
       @RequestParam("code") String code,
       @RequestParam("state") String state,
       HttpSession session
   ) {
-    String token = naverLoginService.getNaverApiKey(session,code, state);
+    String token = naverLoginService.getNaverApiKey(session,state, code);
     naverLoginService.doNaverLogin(session, token);
 
     HttpHeaders headers = new HttpHeaders();

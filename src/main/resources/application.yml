@@ -33,7 +33,11 @@ server:
     session:
       cookie:
         name: JSESSIONID
-#
+
+logging:
+  level:
+    org.springframework.security.web.csrf: DEBUG
+
 #
 #
 #

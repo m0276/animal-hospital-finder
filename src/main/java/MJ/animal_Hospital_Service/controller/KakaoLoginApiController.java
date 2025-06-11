@@ -35,7 +35,8 @@ public class KakaoLoginApiController {
     HttpHeaders headers = new HttpHeaders();
     String uri = "https://kauth.kakao.com/oauth/authorize?"
         + "response_type=code&client_id="
-        +kakaoApiKey +"&redirect_uri=" + kakaoRedirectUri;
+        +kakaoApiKey +"&redirect_uri=" + kakaoRedirectUri
+        +"&state=" + state;
     headers.setLocation(URI.create(uri));
 
     return new ResponseEntity<>(headers, HttpStatus.FOUND);
