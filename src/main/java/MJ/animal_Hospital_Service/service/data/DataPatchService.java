@@ -20,9 +20,11 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class DataPatchService {
 
   private final ApiService apiService;
@@ -82,7 +84,11 @@ public class DataPatchService {
          .collect(Collectors.toSet());
 
      dbIds.removeAll(newIds);
-     if(!dbIds.isEmpty()) hospitalRepository.deleteAllById(dbIds.stream().toList());
+     if(!dbIds.isEmpty()){
+       for(String id : dbIds){
+         hospitalRepository.deleteHospitalByPlaceId(id);
+       }
+     }
   }
 
 }

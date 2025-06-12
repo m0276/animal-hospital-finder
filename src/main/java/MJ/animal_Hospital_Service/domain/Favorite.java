@@ -23,5 +23,5 @@ public class Favorite {
   Long userId;
 
   @Column(nullable = false, name = "hospital_id")
-  String hospitalId; // 카카오맵의 place id / 구글맵의 location id 활용
+  String hospitalId; // place id
 }

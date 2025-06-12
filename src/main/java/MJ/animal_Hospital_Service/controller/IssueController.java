@@ -42,4 +42,9 @@ public class IssueController {
     return ResponseEntity.noContent().build();
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<IssueDto> getIssue(@PathVariable Long id){
+    return ResponseEntity.ok(issueService.getIssue(id));
+  }
+
 }

@@ -31,18 +31,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class ApiService {
   private final ObjectMapper objectMapper;
-  private final HospitalMapper hospitalMapper;
   private final RestTemplate restTemplate;
-
-  @Value("${restApiKey}")
-  private String restApiKey;
 
   @Value("${googleApiKey}")
   private String googleKey;

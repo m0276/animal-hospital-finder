@@ -49,11 +49,10 @@
 </form>
 
 <label for="issueDetail">상세 내용:</label>
-<textarea id="issueDetail" name="issueDetail" rows="4" required placeholder="수정 사항을 입력하세요..."></textarea>
+<textarea id="issueDetail" name="issueDetail" rows="10" required placeholder="수정 사항을 입력하세요..."></textarea>
 
 <div class="modal-footer">
-  <button type="button" onclick = "handleIssue()">제출</button>
-  <button type="button" onclick="closeModal()">취소</button>
+  <button type="button" onclick = "handleIssue()">제출</button>  <button type="button" onclick="closeModal()">취소</button>
 </div>
 
 <script>
@@ -61,11 +60,11 @@
     return {
       type: document.getElementById('issueType').value,
       issue: document.getElementById('issueDetail').value,
-      hospitalId: document.getElementById("hospitalId")
+      hospitalId: document.getElementById('hospitalId').value
     };
   }
 
-  async function handleIssue(role) {
+  async function handleIssue() {
     const formData = getFormData();
 
     const csrfToken = getCookie('XSRF-TOKEN');
@@ -86,6 +85,7 @@
       alert('수정 요청 성공!');
       window.location.href = '/';
     } catch (err) {
+      console.log();
       alert('수정 요청 실패: ' + err.message);
     }
   }

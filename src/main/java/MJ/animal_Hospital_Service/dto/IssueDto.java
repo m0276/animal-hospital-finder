@@ -6,7 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IssueDto {
+  Long id;
   String type;
   String issue;
-  Long hospitalId;
+  String hospitalId;
+  String hospitalName;
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,5 +28,8 @@ public class Issue {
   Long userId;
 
   @Column(name = "hospital_id")
-  Long hospitalId;
+  String hospitalId;
+
+  @Column(name = "hospital_name")
+  String hospitalName;
 }

@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface HospitalRepository extends JpaRepository<Hospital, String> {
+public interface HospitalRepository extends JpaRepository<Hospital, Long> {
   @Query("SELECT h.placeId FROM Hospital h")
   Set<String> findAllLocationIds();
 
@@ -22,4 +22,6 @@ public interface HospitalRepository extends JpaRepository<Hospital, String> {
   List<Hospital> findAllByLoc(@Param("x")double x, @Param("y") double y);
 
   Optional<Hospital> findByPlaceId(String placeId);
+
+  void deleteHospitalByPlaceId(String placeId);
 }

@@ -21,7 +21,7 @@ public class HospitalService {
 
   // 태그 변경
   public HospitalDto updateTag(String placeId, String tag, int tagNumber){
-    Hospital hospital = hospitalRepository.findById(placeId)
+    Hospital hospital = hospitalRepository.findByPlaceId(placeId)
         .orElseThrow(NoSuchElementException::new);
 
     if(tagNumber == 1) hospital.setTag(tag);
@@ -33,7 +33,7 @@ public class HospitalService {
 
   // 태그 추가
   public HospitalDto addTag(String placeId, String tag){
-    Hospital hospital = hospitalRepository.findById(placeId)
+    Hospital hospital = hospitalRepository.findByPlaceId(placeId)
         .orElseThrow(NoSuchElementException::new);
 
     if(hospital.getTag() == null) hospital.setTag(tag);
@@ -45,7 +45,7 @@ public class HospitalService {
 
   // 태그 삭제
   public HospitalDto deleteTag(String placeId, int tagNumber){
-    Hospital hospital = hospitalRepository.findById(placeId)
+    Hospital hospital = hospitalRepository.findByPlaceId(placeId)
         .orElseThrow(NoSuchElementException::new);
 
     if(tagNumber == 1) hospital.setTag(null);
@@ -66,10 +66,13 @@ public class HospitalService {
     return result;
   }
 
-  public HospitalDto findHospitalInfo(String hospitalId){
-    Hospital hos = hospitalRepository.findByPlaceId(hospitalId).orElseThrow(NoSuchElementException::new);
+  public HospitalDto findHospitalInfo(String hospitalPlaceId){
+    Hospital hos = hospitalRepository.findByPlaceId(hospitalPlaceId).orElseThrow(NoSuchElementException::new);
 
     return hospitalMapper.toDto(hos);
   }
 
+  public String findByIdReturnName(Long id) {
+    return hospitalRepository.findById(id).orElseThrow(NoSuchElementException::new).getName();
+  }
 }

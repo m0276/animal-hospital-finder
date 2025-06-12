@@ -23,6 +23,11 @@ public class HtmlController {
     return "favList";
   }
 
+  @GetMapping("/issueList")
+  public String issue(){
+    return "issueList";
+  }
+
   @GetMapping("/")
   public String goMain(Model model){
     model.addAttribute("javascriptKey", javascriptKey);
@@ -43,5 +48,11 @@ public class HtmlController {
   public String getIssue(@PathVariable String hospitalId, Model model){
     model.addAttribute("hospitalId",hospitalId);
     return "issue";
+  }
+
+  @GetMapping("/issue/me/{id}")
+  public String getPatchIssue(@PathVariable Long id, Model model){
+    model.addAttribute("issueId",id);
+    return "issuePath";
   }
 }

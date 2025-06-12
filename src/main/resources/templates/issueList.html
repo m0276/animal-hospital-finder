@@ -48,10 +48,9 @@
       list.forEach(item => {
         const div = document.createElement("div");
         div.className = "issue-item";
-        div.innerHTML = `
-            <strong>${item.type}</strong><br/>
-            ${item.issue}<br/>
-            ${item.hospitalId}<br/>
+        div.innerHTML = ` ${item.type} | ${item.issue} | ${item.hospitalName}<br/>
+
+          <button onclick="editIssue(${item.id})">수정</button> <button onclick="deleteIssue(${item.id})">삭제</button>
           `;
         container.appendChild(div);
       });
@@ -59,6 +58,46 @@
       document.getElementById("issueList").innerHTML = "오류 발생: " + err.message;
     }
   }
+
+  function editIssue(id) {
+    location.href = `/issue/me/${id}`;
+  }
+
+  async function deleteIssue(id) {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await fetch(`/api/issue/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": getCookie('XSRF-TOKEN')
+        },
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("삭제 실패");
+
+      alert("삭제 완료!");
+      await loadIssueList();
+    } catch (err) {
+      alert("오류 발생: " + err.message);
+    }
+  }
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!getCookie('XSRF-TOKEN')) {
+      try {
+        await fetch('/csrf', {credentials: 'same-origin'});
+      } catch (err) {
+        console.error("CSRF 재요청 실패:", err);
+      }
+    }
+  })
 
   window.onload = loadIssueList;
 </script>
