@@ -63,10 +63,13 @@ public class FavoriteService {
         .hospitalId(hospitalId)
         .userId(userId)
         .build();
+
+    hospitalService.setIsFavorite(true,hospitalId);
     favoriteRepository.save(favorite);
   }
 
   private void delete(String hospitalId,Long userId){
     favoriteRepository.deleteByHospitalIdAndUserId(hospitalId,userId);
+    hospitalService.setIsFavorite(false,hospitalId);
   }
 }

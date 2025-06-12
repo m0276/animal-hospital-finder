@@ -72,7 +72,8 @@ public class HospitalService {
     return hospitalMapper.toDto(hos);
   }
 
-  public String findByIdReturnName(Long id) {
-    return hospitalRepository.findById(id).orElseThrow(NoSuchElementException::new).getName();
+  public void setIsFavorite(boolean status,String hospitalId){
+    Hospital hospital = hospitalRepository.findByPlaceId(hospitalId).orElseThrow(NoSuchElementException::new);
+    hospital.setFavorite(status);
   }
 }

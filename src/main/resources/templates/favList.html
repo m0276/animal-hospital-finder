@@ -45,11 +45,16 @@
       list.forEach(item => {
         const div = document.createElement("div");
         div.className = "favorite-item";
+
+        const isFavorite = item.isFavorite; // true 또는 false
+
         div.innerHTML = `
-            <strong>${item.name}</strong><br/>
-            ${item.formattedAddress}<br/>
-            <a href="${item.websiteUri}" target="_blank">홈페이지</a>
-          `;
+      <strong>${item.name}</strong><br/>
+      ${item.formattedAddress}<br/>
+      <a href="${item.placeUrl}" target="_blank">홈페이지</a><br/>
+      <span class="star" data-id="${item.id}" style="cursor:pointer; color: ${isFavorite ? 'gold' : 'lightgray'}">★</span>
+    `;
+
         container.appendChild(div);
       });
     } catch (err) {
