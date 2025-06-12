@@ -2,8 +2,9 @@ package MJ.animal_Hospital_Service.repository;
 
 import MJ.animal_Hospital_Service.domain.Hospital;
 import io.lettuce.core.dynamic.annotation.Param;
-import java.util.Collection;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,5 @@ public interface HospitalRepository extends JpaRepository<Hospital, String> {
   )
   List<Hospital> findAllByLoc(@Param("x")double x, @Param("y") double y);
 
+  Optional<Hospital> findByPlaceId(String placeId);
 }

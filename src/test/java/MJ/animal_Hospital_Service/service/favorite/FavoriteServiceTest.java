@@ -16,6 +16,7 @@ import MJ.animal_Hospital_Service.domain.Favorite;
 import MJ.animal_Hospital_Service.domain.Hospital;
 import MJ.animal_Hospital_Service.domain.User;
 import MJ.animal_Hospital_Service.dto.FavoriteDto;
+import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.dto.UserDto;
 import MJ.animal_Hospital_Service.repository.FavoriteRepository;
 import MJ.animal_Hospital_Service.service.user.UserMapper;
@@ -78,7 +79,7 @@ class FavoriteServiceTest {
     given(userService.get(anyString())).willReturn(dto);
     given(favoriteRepository.findByUserId(user.getId())).willReturn(Collections.emptyList());
 
-    List<FavoriteDto> list = favoriteService.getList();
+    List<HospitalDto> list = favoriteService.getList();
 
     assertTrue(list.isEmpty());
   }

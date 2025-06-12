@@ -107,6 +107,7 @@
   </div>
   <div th:unless="${#authorization.expression('isAnonymous()')}">
     <button onclick="location.href='/logout'">로그아웃</button>
+    <button onclick="location.href='/issueList'">수정 요청 확인</button>
     <button onclick="location.href='/favList'">즐겨찾기 확인</button>
   </div>
 </div>
@@ -295,7 +296,7 @@
     try {
       const res = await fetch("/api/favorite/" + hospital.id, {
         method: "PUT",
-        credentials: "same-origin",
+        credentials: "include",
         headers: { "Content-Type": "application/json",
           'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')},
         body: JSON.stringify(hospital)
@@ -310,11 +311,19 @@
   }
 
   function getCookie(name) {
-    const matches = document.cookie.match(new RegExp(
-        `(?:^|; )${name.replace(/([$?*|{}()\[\]\\/+^])/g, '\\$1')}=([^;]*)`
-    ));
-    return matches ? decodeURIComponent(matches[1]).trim() : null;
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
   }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!getCookie('XSRF-TOKEN')) {
+      try {
+        await fetch('/csrf', { credentials: 'same-origin' });
+      } catch (err) {
+        console.error("CSRF 재요청 실패:", err);
+      }
+    }
+  });
 
   function showModal(hospital, originalIcon) {
     const modal = document.getElementById("hospitalModal");
@@ -329,7 +338,9 @@
       <p><strong>전화:</strong> ${hospital.nationalPhoneNumber || "정보 없음"}</p>
       <p><strong>홈페이지:</strong> <a href="${hospital.websiteUri}" target="_blank">바로가기</a></p>
       <p><strong>태그:</strong> ${[hospital.tag, hospital.tag2, hospital.tag3].filter(Boolean).join(", ") || "없음"}</p>
-    `;
+
+      <button onclick="location.href='/issue/${hospital.id}'">수정 요청</button>
+`;
 
     modalFavoriteIcon = document.createElement("span");
     modalFavoriteIcon.className = "favorite-icon";

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HtmlController {
@@ -36,5 +37,11 @@ public class HtmlController {
   @GetMapping("/naver")
   public String goNLogin() {
     return "redirect:/oauth/naver";
+  }
+
+  @GetMapping("/issue/{hospitalId}")
+  public String getIssue(@PathVariable String hospitalId, Model model){
+    model.addAttribute("hospitalId",hospitalId);
+    return "issue";
   }
 }

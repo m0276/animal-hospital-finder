@@ -31,16 +31,22 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http  .csrf(csrf -> csrf
-            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            .csrfTokenRepository(cookieCsrfTokenRepository())
             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
             .ignoringRequestMatchers( new AntPathRequestMatcher("/api/user/**", "POST"))
         )
+        .sessionManagement(session -> session
+            .sessionFixation().migrateSession()
+        )
         .httpBasic(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((authorize) -> authorize
-            .requestMatchers("/api/hospital/**").hasRole("ADMIN")
+            .requestMatchers("/api/favorite/**").authenticated()
+            .requestMatchers("/api/hospital/**").authenticated()
+            .requestMatchers("/api/hospital/tag/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.GET,"/api/user/me").authenticated()
             .requestMatchers(HttpMethod.PATCH,"/api/user/me").authenticated()
+            .requestMatchers("/api/issue/**").authenticated()
             .anyRequest().permitAll())
         .formLogin(login -> login.defaultSuccessUrl("/"))
         .logout(logout -> logout.logoutSuccessUrl("/")
@@ -69,6 +75,14 @@ public class SecurityConfig {
         .passwordEncoder(bCryptPasswordEncoder());
 
     return authManagerBuilder.build();
+  }
+
+  @Bean
+  public CookieCsrfTokenRepository cookieCsrfTokenRepository() {
+    CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+    repo.setCookiePath("/");
+    repo.setSecure(false);
+    return repo;
   }
 
 }

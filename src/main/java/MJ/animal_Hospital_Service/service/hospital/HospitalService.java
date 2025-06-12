@@ -66,4 +66,10 @@ public class HospitalService {
     return result;
   }
 
+  public HospitalDto findHospitalInfo(String hospitalId){
+    Hospital hos = hospitalRepository.findByPlaceId(hospitalId).orElseThrow(NoSuchElementException::new);
+
+    return hospitalMapper.toDto(hos);
+  }
+
 }

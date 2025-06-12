@@ -1,6 +1,7 @@
 package MJ.animal_Hospital_Service.controller;
 
 import MJ.animal_Hospital_Service.dto.FavoriteDto;
+import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.service.favorite.FavoriteService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class FavoriteController {
   private final FavoriteService favoriteService;
 
   @GetMapping
-  public ResponseEntity<List<FavoriteDto>> getList(){
+  public ResponseEntity<List<HospitalDto>> getList(){
     return ResponseEntity.ok(favoriteService.getList());
   }
 

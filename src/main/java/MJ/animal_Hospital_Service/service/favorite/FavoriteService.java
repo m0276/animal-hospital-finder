@@ -2,7 +2,9 @@ package MJ.animal_Hospital_Service.service.favorite;
 
 import MJ.animal_Hospital_Service.domain.Favorite;
 import MJ.animal_Hospital_Service.dto.FavoriteDto;
+import MJ.animal_Hospital_Service.dto.HospitalDto;
 import MJ.animal_Hospital_Service.repository.FavoriteRepository;
+import MJ.animal_Hospital_Service.service.hospital.HospitalService;
 import MJ.animal_Hospital_Service.service.user.UserService;
 import MJ.animal_Hospital_Service.util.LoginUtil;
 import java.util.ArrayList;
@@ -20,19 +22,20 @@ public class FavoriteService {
   private final FavoriteRepository favoriteRepository;
   private final FavoriteMapper favoriteMapper;
   private final UserService userService;
+  private final HospitalService hospitalService;
 
-  public List<FavoriteDto> getList(){
+  public List<HospitalDto> getList(){
     if(LoginUtil.isLogin()){
       String username = LoginUtil.getCurrentUser();
 
-      Long userId = userService.get(username).id();
+      Long userId = userService.findByUserNameReturnId(username);
 
       List<Favorite> list = favoriteRepository.findByUserId(userId);
 
-      List<FavoriteDto> result = new ArrayList<>();
+      List<HospitalDto> result = new ArrayList<>();
 
       for(Favorite favorite: list){
-        result.add(favoriteMapper.toFavoriteDto(favorite));
+        result.add(hospitalService.findHospitalInfo(favorite.getHospitalId()));
       }
 
       return result;

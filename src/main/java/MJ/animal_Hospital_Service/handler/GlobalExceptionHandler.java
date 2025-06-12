@@ -40,4 +40,12 @@ public class GlobalExceptionHandler {
         e.getMessage()));
   }
 
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorResponse> exception(Exception e){
+//    e.printStackTrace();
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        e.getMessage()));
+  }
+
 }
