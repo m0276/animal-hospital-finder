@@ -29,4 +29,9 @@ public class FavoriteController {
     return ResponseEntity.noContent().build();
   }
 
+  @GetMapping("/list")
+  public ResponseEntity<List<String>> getIds(){
+    return ResponseEntity.ok(favoriteService.getIds());
+  }
+
 }

@@ -25,7 +25,6 @@ public class HospitalDto {
   private String tag3;
   private String websiteUri;
   private String nationalPhoneNumber;
-  private boolean isFavorite;
 
   @JsonProperty("location")
   private void unpackGeometry(Map<String, Object> location) {

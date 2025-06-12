@@ -9,6 +9,7 @@ import MJ.animal_Hospital_Service.service.user.UserService;
 import MJ.animal_Hospital_Service.util.LoginUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,12 +65,20 @@ public class FavoriteService {
         .userId(userId)
         .build();
 
-    hospitalService.setIsFavorite(true,hospitalId);
     favoriteRepository.save(favorite);
   }
 
   private void delete(String hospitalId,Long userId){
     favoriteRepository.deleteByHospitalIdAndUserId(hospitalId,userId);
-    hospitalService.setIsFavorite(false,hospitalId);
+  }
+
+  public List<String> getIds(){
+    if(LoginUtil.isLogin()) {
+      String username = LoginUtil.getCurrentUser();
+      return (favoriteRepository.findByUserId(userService.findByUserNameReturnId(username)).stream()
+          .map(Favorite::getHospitalId).collect(Collectors.toList()));
+    }
+
+    throw new NoSuchElementException();
   }
 }

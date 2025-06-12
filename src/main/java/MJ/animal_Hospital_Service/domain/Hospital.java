@@ -50,8 +50,7 @@ public class Hospital {
   Point loc;
   @Column(name = "open_time")
   String openTime;
-  @Column(name = "is_favorite")
-  boolean isFavorite = false;
+
 
   public void setPhone(String phone) {
     this.nationalPhoneNumber = phone;

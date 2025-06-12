@@ -72,8 +72,4 @@ public class HospitalService {
     return hospitalMapper.toDto(hos);
   }
 
-  public void setIsFavorite(boolean status,String hospitalId){
-    Hospital hospital = hospitalRepository.findByPlaceId(hospitalId).orElseThrow(NoSuchElementException::new);
-    hospital.setFavorite(status);
-  }
 }

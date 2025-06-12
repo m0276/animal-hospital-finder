@@ -211,8 +211,19 @@
 
   async function loadNear() {
     try {
-      const response = await fetch("/api/loc");
-      const hospitals = await response.json();
+      const [hospitalRes, favoriteRes] = await Promise.all([
+        fetch("/api/loc"),
+        fetch("/api/favorite/list", { credentials: "include" })
+      ]);
+
+      const hospitals = await hospitalRes.json();
+      const favoriteIds = await favoriteRes.json();
+      const favoriteSet = new Set(favoriteIds);
+
+      hospitals.forEach(h => {
+        h.favorite = favoriteSet.has(h.id);
+      });
+
       makeMarker(hospitals);
     } catch (error) {
       console.error("API 오류:", error);
