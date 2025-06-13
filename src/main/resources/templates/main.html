@@ -404,7 +404,12 @@
       <p><strong>주소:</strong> ${hospital.formattedAddress}<br></p>
       <p><strong>영업시간:</strong><br>${formatted}</p>
       <p><strong>전화:</strong> ${hospital.nationalPhoneNumber || "정보 없음"}</p>
-      <p><strong>홈페이지:</strong> <a href="${hospital.websiteUri}" target="_blank">바로가기</a></p>
+      <p><strong>홈페이지:</strong> ${
+        hospital.websiteUri
+            ? `<a href="${hospital.websiteUri}" target="_blank">바로가기</a>`
+            : `미등록`
+    }
+  </p>
       <p><strong>태그:</strong> ${[hospital.tag, hospital.tag2, hospital.tag3].filter(Boolean).join(", ") || "없음"}</p>
 
       <button onclick="location.href='/issue/${hospital.id}'">수정 요청</button>
