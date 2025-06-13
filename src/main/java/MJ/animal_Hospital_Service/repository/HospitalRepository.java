@@ -16,10 +16,10 @@ public interface HospitalRepository extends JpaRepository<Hospital, Long> {
   Set<String> findAllLocationIds();
 
   @Query(
-      value = "SELECT * FROM hospital WHERE ST_Distance_Sphere(loc,ST_GeomFromText(CONCAT('POINT(', ?1, ' ', ?2, ')'), 4326)) <= 5000",
+      value = "SELECT * FROM hospital WHERE ST_Distance_Sphere(loc, ST_GeomFromText(CONCAT('POINT(', ?1, ' ', ?2, ')'), 4326 )) > ?3 * 5000 AND ST_Distance_Sphere(loc, ST_GeomFromText(CONCAT('POINT(', ?1, ' ', ?2, ')'), 4326 )) <= (?3 + 1) * 5000",
       nativeQuery = true
   )
-  List<Hospital> findAllByLoc(@Param("x")double x, @Param("y") double y);
+  List<Hospital> findAllByLoc(@Param("x")double x, @Param("y")double y, @Param("step") int step);
 
   Optional<Hospital> findByPlaceId(String placeId);
 

@@ -18,11 +18,12 @@ public class CurrentLocController {
   private final LocationService locationService;
 
   @GetMapping
-  public ResponseEntity<List<HospitalDto>> getHospitalsNearCurrentLocation(HttpServletRequest request) {
+  public ResponseEntity<List<HospitalDto>> getHospitalsNearCurrentLocation(HttpServletRequest request,
+  @RequestParam(defaultValue = "0") int clickCount) {
     try {
       String clientIp = locationService.extractClientIp(request);
       CurrentLoc loc = locationService.getCurrentLocation(clientIp);
-      List<HospitalDto> hospitals = locationService.findCloseHospitals(loc);
+      List<HospitalDto> hospitals = locationService.findCloseHospitals(loc,clickCount);
       return ResponseEntity.ok(hospitals);
     } catch (Exception e) {
       return ResponseEntity.internalServerError().build();

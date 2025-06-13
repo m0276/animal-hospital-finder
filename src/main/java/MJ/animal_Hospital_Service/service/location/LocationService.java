@@ -34,8 +34,8 @@ public class LocationService {
   @Value("${geo_api_secret_key}")
   private String secret;
 
-  public List<HospitalDto> findCloseHospitals(CurrentLoc currentLoc) {
-    return hospitalService.findInRangeHospital(currentLoc.getLat(), currentLoc.get_long());
+  public List<HospitalDto> findCloseHospitals(CurrentLoc currentLoc, int clickCount) {
+    return hospitalService.findInRangeHospital(currentLoc.getLat(), currentLoc.get_long(), clickCount);
   }
 
   public CurrentLoc getCurrentLocation(String ip) {

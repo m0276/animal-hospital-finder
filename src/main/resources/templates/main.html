@@ -84,12 +84,37 @@
     }
 
     .button-group {
-      display: inline-block;
-    }
-    .button-group > button {
-      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
+    .button-group button {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      transition: background 0.2s ease;
+    }
+
+    .button-group button:hover {
+      background: #eaeaea;
+    }
+
+    .button-group .load-more {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      background: #007bff;
+      color: #ffffff;
+      border: none;
+    }
+
+    .button-group .load-more:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -110,6 +135,10 @@
     <button onclick="location.href='/issueList'">수정 요청 확인</button>
     <button onclick="location.href='/favList'">즐겨찾기 확인</button>
   </div>
+
+  <button id="loadMoreBtn" style="margin: 20px; padding: 10px 20px; font-size: 1em">
+    더보기
+  </button>
 </div>
 
 <div id="container">
@@ -129,6 +158,8 @@
 </script>
 
 <script>
+  const isLoggedIn = /*[[${#authorization.expression('!isAnonymous()')}]]*/ false;
+
   // Kakao SDK 동적 로드
   function loadKakaoSDK(appkey, callback) {
     const script = document.createElement("script");
@@ -154,7 +185,7 @@
       center: new kakao.maps.LatLng(currLat, currLong),
       level: 3
     };
-
+    clickCount = 0;
     map = new kakao.maps.Map(mapContainer, mapOption);
 
     const currImageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png";
@@ -169,7 +200,7 @@
       title: "현재 위치"
     });
 
-    await loadNear();
+    await loadNear(0);
   }
 
   async function loadLocation() {
@@ -208,32 +239,56 @@
       );
     });
   }
+  let clickCount = 0;
 
-  async function loadNear() {
+  document.getElementById('loadMoreBtn').addEventListener('click', () => {
+    clickCount++;
+    loadNear(clickCount, true);
+  });
+
+
+  async function loadNear(step, append = false) {
     try {
-      const [hospitalRes, favoriteRes] = await Promise.all([
-        fetch("/api/loc"),
-        fetch("/api/favorite/list", { credentials: "include" })
-      ]);
+      const fetches = [fetch(`/api/loc?clickCount=${step}`)];
+      if (isLoggedIn) {
+        fetches.push(fetch("/api/favorite/list", {credentials: "include"}));
+      }
+
+      const results = await Promise.all(fetches);
+      const hospitalRes = results[0];
+      if (!hospitalRes.ok) throw new Error("병원 데이터 불러오기 실패");
 
       const hospitals = await hospitalRes.json();
-      const favoriteIds = await favoriteRes.json();
+
+      let favoriteIds = [];
+      if (isLoggedIn) {
+        const favoriteRes = results[1];
+        if (!favoriteRes.ok) throw new Error("즐겨찾기 데이터 불러오기 실패");
+        favoriteIds = await favoriteRes.json();
+      }
+
       const favoriteSet = new Set(favoriteIds);
 
       hospitals.forEach(h => {
         h.favorite = favoriteSet.has(h.id);
       });
 
-      makeMarker(hospitals);
+      makeMarker(hospitals, append);
     } catch (error) {
       console.error("API 오류:", error);
     }
   }
+  let markers = [];  // 전역으로 마커 관리용 배열 추가
 
-  function makeMarker(list) {
+  function makeMarker(list, append = false) {
     const imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
     const listContainer = document.getElementById("list");
-    listContainer.innerHTML = "";
+
+    if (!append) {
+      markers.forEach(marker => marker.setMap(null));
+      markers = [];
+      listContainer.innerHTML = "";
+    }
 
     list.forEach(pos => {
       pos.favorite = pos.favorite || false;
@@ -249,6 +304,8 @@
         image: markerImage
       });
 
+      markers.push(marker);
+
       const item = document.createElement("div");
       item.className = "hospital-item";
 
@@ -263,10 +320,10 @@
       .join(" ");
 
       info.innerHTML = `
-        <strong>${pos.name}</strong><br/>
-        ${pos.formattedAddress}
-        <div class="tag-container">${tagHTML || '<span class="tag-pill empty">태그 없음</span>'}</div>
-      `;
+      <strong>${pos.name}</strong><br/>
+      ${pos.formattedAddress}
+      <div class="tag-container">${tagHTML || '<span class="tag-pill empty">태그 없음</span>'}</div>
+    `;
 
       const favIcon = document.createElement("span");
       favIcon.className = "favorite-icon";

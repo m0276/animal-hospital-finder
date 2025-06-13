@@ -55,8 +55,8 @@ public class HospitalService {
     return hospitalMapper.toDto(hospital);
   }
 
-  public List<HospitalDto> findInRangeHospital(String x, String y){
-    List<Hospital> list = hospitalRepository.findAllByLoc(Double.parseDouble(x),Double.parseDouble(y));
+  public List<HospitalDto> findInRangeHospital(String x, String y, int clickCount){
+    List<Hospital> list = hospitalRepository.findAllByLoc(Double.parseDouble(x),Double.parseDouble(y),clickCount);
 
     List<HospitalDto> result = new ArrayList<>();
     for(Hospital h : list){
