@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    form {
+      width: 300px;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 50%;
+      padding: 10px;
+      margin-right: 2%;
+    }
+  </style>
+</head>
+<body>
+
+<h2>수정 요청 사항</h2>
+
+<form id="issueForm">
+  <input type="hidden" id="hospitalId" name="hospitalId" th:value="${hospitalId}" />
+
+  <label for="issueType">수정 종류:</label>
+  <select id="issueType" name="issueType" required>
+    <option value="">-- 선택하세요 --</option>
+    <option value="전화번호">전화번호</option>
+    <option value="주소">주소</option>
+    <option value="운영시간">운영시간</option>
+    <option value="태그">태그</option>
+    <option value="기타">기타</option>
+  </select>
+
+</form>
+
+<label for="issueDetail">상세 내용:</label>
+<textarea id="issueDetail" name="issueDetail" rows="10" required placeholder="수정 사항을 입력하세요..."></textarea>
+
+<div class="modal-footer">
+  <button type="button" onclick = "handleIssue()">제출</button>  <button type="button" onclick="closeModal()">취소</button>
+</div>
+
+<script>
+  function getFormData() {
+    return {
+      type: document.getElementById('issueType').value,
+      issue: document.getElementById('issueDetail').value,
+      hospitalId: document.getElementById('hospitalId').value
+    };
+  }
+
+  async function handleIssue() {
+    const formData = getFormData();
+
+    const csrfToken = getCookie('XSRF-TOKEN');
+
+    try {
+      const res = await fetch("/api/issue", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(formData),
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      alert('수정 요청 성공!');
+      window.location.href = '/';
+    } catch (err) {
+      console.log();
+      alert('수정 요청 실패: ' + err.message);
+    }
+  }
+
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!getCookie('XSRF-TOKEN')) {
+      try {
+        await fetch('/csrf', { credentials: 'same-origin' });
+      } catch (err) {
+        console.error("CSRF 재요청 실패:", err);
+      }
+    }
+  });
+</script>
+
+
+<script>
+  function closeModal() {
+    document.getElementById("hospitalModal").style.display = "none";
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  app:
+    build: .
+    container_name: animal_hospital_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${name}
+      SPRING_DATASOURCE_USERNAME: ${username}
+      SPRING_DATASOURCE_PASSWORD: ${password}
+    depends_on:
+      - redis
+      - mysql
+
+  redis:
+    image: redis:7
+    container_name: animal_hospital_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mysql:
+    image: mysql:latest
+    container_name: animal_hospital_db
+    environment:
+      MYSQL_DATABASE: ${name}
+      MYSQL_USER: ${username}
+      MYSQL_PASSWORD: ${password}
+      MYSQL_ROOT_PASSWORD: ${root_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./src/main/resources/private.sql:/docker-entrypoint-initdb.d/private.sql
+
+volumes:
+  redis_data:

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    form {
+      width: 300px;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 50%;
+      padding: 10px;
+      margin-right: 2%;
+    }
+  </style>
+</head>
+<body>
+
+<h2>회원가입</h2>
+
+<form id="signupForm">
+  <label for="name"></label><input type="text" id="name" placeholder="이름" required />
+  <label for="password"></label><input type="password" id="password" placeholder="비밀번호" required />
+</form>
+
+<div>
+  <button onclick="handleSignup('USER')">유저 가입</button>
+  <button onclick="handleSignup('HOSPITAL')">병원 가입</button>
+</div>
+
+<script>
+  function getFormData() {
+    return {
+      username: document.getElementById('name').value,
+      password: document.getElementById('password').value
+    };
+  }
+
+  async function handleSignup(role) {
+    const formData = getFormData();
+    const url = role === 'HOSPITAL' ? '/api/user/hospital' : '/api/user';
+    const csrfToken = getCookie('XSRF-TOKEN');
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-XSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(formData),
+        credentials: 'include'
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      alert('회원가입 성공!');
+      window.location.href = '/login';
+    } catch (err) {
+      alert('회원가입 실패: ' + err.message);
+    }
+  }
+
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!getCookie('XSRF-TOKEN')) {
+      try {
+        await fetch('/csrf', { credentials: 'same-origin' });
+      } catch (err) {
+        console.error("CSRF 재요청 실패:", err);
+      }
+    }
+  });
+</script>
+</body>
+</html>

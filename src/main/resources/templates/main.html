@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <title>주변 병원 확인하기</title>
+  <style>
+    #container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    #map {
+      flex: 2;
+      height: 100%;
+    }
+    #list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1em;
+      border-left: 1px solid #ccc;
+    }
+    .hospital-item {
+      margin-bottom: 1em;
+      padding: 0.5em;
+      border-bottom: 1px solid #eee;
+    }
+    .hospital-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .hospital-header:hover {
+      background-color: #f0f8ff;
+    }
+    .favorite-icon {
+      font-size: 1.5em;
+      color: gold;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .tag-container {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag-pill {
+      background-color: #e6f0ff;
+      color: #0057a3;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: 500;
+      border: 1px solid #b0d0ff;
+      display: inline-block;
+    }
+    .tag-pill.empty {
+      background-color: #f5f5f5;
+      color: #aaa;
+      border-style: dashed;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .modal-close {
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .button-group button {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      transition: background 0.2s ease;
+    }
+
+    .button-group button:hover {
+      background: #eaeaea;
+    }
+
+    .button-group .load-more {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      background: #007bff;
+      color: #ffffff;
+      border: none;
+    }
+
+    .button-group .load-more:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="button-group">
+  <div th:if="${#authorization.expression('isAnonymous()')}">
+    <button onclick="location.href='/join'">회원가입</button>
+    <button onclick="location.href='/login'">로그인</button>
+    <button onclick="location.href='/kakao'"style="padding: 0; border: none; background: none; cursor: pointer;">
+      <img src="/image/kakao_login_medium_narrow.png" alt="카카오 로그인" style="width: auto; height: 26px;" />
+    </button>
+    <button onclick="location.href='/naver'" style="padding: 0; border: none; background: none; cursor: pointer;">
+      <img src="/image/btnG_완성형.png" alt="네이버 로그인" style="width: auto; height: 26px;" />
+    </button>
+  </div>
+  <div th:unless="${#authorization.expression('isAnonymous()')}">
+    <button onclick="location.href='/logout'">로그아웃</button>
+    <button onclick="location.href='/issueList'">수정 요청 확인</button>
+    <button onclick="location.href='/favList'">즐겨찾기 확인</button>
+  </div>
+
+  <button id="loadMoreBtn" style="margin: 20px; padding: 10px 20px; font-size: 1em">
+    더보기
+  </button>
+</div>
+
+<div id="container">
+  <div id="map"></div>
+  <div id="list"></div>
+</div>
+
+<!-- 모달 -->
+<div id="hospitalModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeModal()">&times;</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<script th:inline="javascript">
+  const JS_KEY = /*[[${javascriptKey}]]*/ "";
+</script>
+
+<script>
+  const isLoggedIn = /*[[${#authorization.expression('!isAnonymous()')}]]*/ false;
+
+  // Kakao SDK 동적 로드
+  function loadKakaoSDK(appkey, callback) {
+    const script = document.createElement("script");
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&autoload=false`;
+    script.onload = callback;
+    document.head.appendChild(script);
+  }
+
+  let map;
+  let modalFavoriteIcon = null;
+
+  async function initMap() {
+    const curr = await loadLocation();
+    if (!curr) {
+      alert("현재 위치 정보를 불러올 수 없습니다.");
+      return;
+    }
+    const currLat = Number(curr.lat);
+    const currLong = Number(curr.long);
+
+    const mapContainer = document.getElementById('map');
+    const mapOption = {
+      center: new kakao.maps.LatLng(currLat, currLong),
+      level: 3
+    };
+    clickCount = 0;
+    map = new kakao.maps.Map(mapContainer, mapOption);
+
+    const currImageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png";
+    const currImageSize = new kakao.maps.Size(24, 35);
+    const currMarkerImage = new kakao.maps.MarkerImage(currImageSrc, currImageSize);
+
+    const currPosition = new kakao.maps.LatLng(currLat, currLong);
+    const currMarker = new kakao.maps.Marker({
+      position: currPosition,
+      image: currMarkerImage,
+      map: map,
+      title: "현재 위치"
+    });
+
+    await loadNear(0);
+  }
+
+  async function loadLocation() {
+    try {
+      const pos = await getCurrentPosition();
+      console.log("클라이언트 위치:", pos);
+      return pos;
+    } catch (e) {
+      console.warn("클라이언트 위치 실패, 서버 IP 위치 요청:", e.message);
+      try {
+        const res = await fetch("/api/loc/curr");
+        if (!res.ok) throw new Error("서버 위치 요청 실패");
+        const ipLoc = await res.json();
+        console.log("서버 IP 위치:", ipLoc);
+        return {
+          lat: Number(ipLoc.lat),
+          long: Number(ipLoc.long) // long 변수명 맞춰서 사용
+        };
+      } catch (serverErr) {
+        console.error("서버 위치 요청 실패:", serverErr);
+        return null;
+      }
+    }
+  }
+
+  async function getCurrentPosition() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not 지원됨"));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+          pos => resolve({ lat: pos.coords.latitude, long: pos.coords.longitude }),
+          err => reject(err),
+          { timeout: 10000 }
+      );
+    });
+  }
+  let clickCount = 0;
+
+  document.getElementById('loadMoreBtn').addEventListener('click', () => {
+    clickCount++;
+    loadNear(clickCount, true);
+  });
+
+
+  async function loadNear(step, append = false) {
+    try {
+      const fetches = [fetch(`/api/loc?clickCount=${step}`)];
+      if (isLoggedIn) {
+        fetches.push(fetch("/api/favorite/list", {credentials: "include"}));
+      }
+
+      const results = await Promise.all(fetches);
+      const hospitalRes = results[0];
+      if (!hospitalRes.ok) throw new Error("병원 데이터 불러오기 실패");
+
+      const hospitals = await hospitalRes.json();
+
+      let favoriteIds = [];
+      if (isLoggedIn) {
+        const favoriteRes = results[1];
+        if (!favoriteRes.ok) throw new Error("즐겨찾기 데이터 불러오기 실패");
+        favoriteIds = await favoriteRes.json();
+      }
+
+      const favoriteSet = new Set(favoriteIds);
+
+      hospitals.forEach(h => {
+        h.favorite = favoriteSet.has(h.id);
+      });
+
+      makeMarker(hospitals, append);
+    } catch (error) {
+      console.error("API 오류:", error);
+    }
+  }
+  let markers = [];  // 전역으로 마커 관리용 배열 추가
+
+  function makeMarker(list, append = false) {
+    const imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+    const listContainer = document.getElementById("list");
+
+    if (!append) {
+      markers.forEach(marker => marker.setMap(null));
+      markers = [];
+      listContainer.innerHTML = "";
+    }
+
+    list.forEach(pos => {
+      pos.favorite = pos.favorite || false;
+
+      const latlng = new kakao.maps.LatLng(Number(pos.lat), Number(pos.lng));
+      const imageSize = new kakao.maps.Size(24, 35);
+      const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+
+      const marker = new kakao.maps.Marker({
+        map: map,
+        position: latlng,
+        title: pos.name,
+        image: markerImage
+      });
+
+      markers.push(marker);
+
+      const item = document.createElement("div");
+      item.className = "hospital-item";
+
+      const header = document.createElement("div");
+      header.className = "hospital-header";
+
+      const info = document.createElement("div");
+
+      const tagHTML = [pos.tag, pos.tag2, pos.tag3]
+      .filter(Boolean)
+      .map(tag => `<span class="tag-pill">${tag}</span>`)
+      .join(" ");
+
+      info.innerHTML = `
+      <strong>${pos.name}</strong><br/>
+      ${pos.formattedAddress}
+      <div class="tag-container">${tagHTML || '<span class="tag-pill empty">태그 없음</span>'}</div>
+    `;
+
+      const favIcon = document.createElement("span");
+      favIcon.className = "favorite-icon";
+      favIcon.textContent = pos.favorite ? "⭐" : "☆";
+      favIcon.dataset.id = pos.id;
+
+      favIcon.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        await toggleFavorite(pos, favIcon);
+        updateOtherIcons(pos.id, pos.favorite);
+      });
+
+      header.appendChild(info);
+      header.appendChild(favIcon);
+      item.appendChild(header);
+      listContainer.appendChild(item);
+
+      header.addEventListener("click", () => {
+        map.panTo(latlng);
+        showModal(pos, favIcon);
+        map.relayout();
+      });
+    });
+  }
+
+  function updateOtherIcons(hospitalId, favoriteStatus) {
+    document.querySelectorAll(".hospital-item .favorite-icon").forEach(icon => {
+      if (icon.dataset.id === String(hospitalId)) {
+        icon.textContent = favoriteStatus ? "⭐" : "☆";
+      }
+    });
+    if (modalFavoriteIcon) {
+      modalFavoriteIcon.textContent = favoriteStatus ? "⭐" : "☆";
+    }
+  }
+
+  async function toggleFavorite(hospital, icon) {
+    try {
+      const res = await fetch("/api/favorite/" + hospital.id, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json",
+          'X-XSRF-TOKEN': getCookie('XSRF-TOKEN')},
+        body: JSON.stringify(hospital)
+      });
+      if (!res.ok) throw new Error(await res.text());
+
+      hospital.favorite = !hospital.favorite;
+      icon.textContent = hospital.favorite ? "⭐" : "☆";
+    } catch (error) {
+      alert("즐겨찾기 실패: " + error.message);
+    }
+  }
+
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!getCookie('XSRF-TOKEN')) {
+      try {
+        await fetch('/csrf', { credentials: 'same-origin' });
+      } catch (err) {
+        console.error("CSRF 재요청 실패:", err);
+      }
+    }
+  });
+
+  function showModal(hospital, originalIcon) {
+    const modal = document.getElementById("hospitalModal");
+    const modalBody = document.getElementById("modalBody");
+
+    const formatted = hospital.weekdayDescriptions.replace(/\n/g, '<br>');
+
+    modalBody.innerHTML = `
+      <h2>${hospital.name}</h2><br>
+      <p><strong>주소:</strong> ${hospital.formattedAddress}<br></p>
+      <p><strong>영업시간:</strong><br>${formatted}</p>
+      <p><strong>전화:</strong> ${hospital.nationalPhoneNumber || "정보 없음"}</p>
+      <p><strong>홈페이지:</strong> ${
+        hospital.websiteUri
+            ? `<a href="${hospital.websiteUri}" target="_blank">바로가기</a>`
+            : `미등록`
+    }
+  </p>
+      <p><strong>태그:</strong> ${[hospital.tag, hospital.tag2, hospital.tag3].filter(Boolean).join(", ") || "없음"}</p>
+
+      <button onclick="location.href='/issue/${hospital.id}'">수정 요청</button>
+`;
+
+    modalFavoriteIcon = document.createElement("span");
+    modalFavoriteIcon.className = "favorite-icon";
+    modalFavoriteIcon.textContent = hospital.favorite ? "⭐" : "☆";
+
+    modalFavoriteIcon.addEventListener("click", async () => {
+      await toggleFavorite(hospital, modalFavoriteIcon);
+      updateOtherIcons(hospital.id, hospital.favorite);
+    });
+
+    modalBody.appendChild(modalFavoriteIcon);
+    modal.style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById("hospitalModal").style.display = "none";
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById("hospitalModal");
+    if (event.target === modal) closeModal();
+  };
+
+  // Kakao SDK 로드 후 지도 초기화
+  window.onload = () => {
+    if (!JS_KEY || JS_KEY.trim() === "") {
+      alert("JS_KEY가 설정되어 있지 않습니다.");
+      return;
+    }
+    loadKakaoSDK(JS_KEY, () => {
+      kakao.maps.load(() => {
+        initMap();
+      });
+    });
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>수정 요청 목록</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .favorite-item {
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
+
+    .issue-item {
+      white-space: pre-wrap; /* 줄바꿈 유지 */
+      word-break: break-word; /* 단어 단위 줄바꿈 */
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      min-height: 80px; /* 높이 늘리기 */
+      background-color: #f9f9f9;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>수정 요청 목록</h2>
+<div id="issueList">불러오는 중...</div>
+
+<p><strong>해당 사이트의 모든 정보는 구글을 통해 가져오고 있습니다.<br>
+  구글에 정확한 정보로 등록 되어 있지 않은 경우 정보 수정이 필요할 수 있습니다.</strong></p>
+
+<script>
+  async function loadIssueList() {
+    try {
+      const res = await fetch("/api/issue");
+      if (!res.ok) throw new Error("서버 응답 오류");
+
+      const list = await res.json();
+      const container = document.getElementById("issueList");
+
+      if (list.length === 0) {
+        container.innerHTML = "<p>수정 요청 항목이 없습니다.</p>";
+        return;
+      }
+
+      container.innerHTML = "";
+      list.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "issue-item";
+        div.innerHTML = ` ${item.type} | ${item.issue} | ${item.hospitalName}<br/>
+
+          <button onclick="editIssue(${item.id})">수정</button> <button onclick="deleteIssue(${item.id})">삭제</button>
+          `;
+        container.appendChild(div);
+      });
+    } catch (err) {
+      document.getElementById("issueList").innerHTML = "오류 발생: " + err.message;
+    }
+  }
+
+  function editIssue(id) {
+    location.href = `/issue/me/${id}`;
+  }
+
+  async function deleteIssue(id) {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await fetch(`/api/issue/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "X-XSRF-TOKEN": getCookie('XSRF-TOKEN')
+        },
+        credentials: "include"
+      });
+
+      if (!res.ok) throw new Error("삭제 실패");
+
+      alert("삭제 완료!");
+      await loadIssueList();
+    } catch (err) {
+      alert("오류 발생: " + err.message);
+    }
+  }
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!getCookie('XSRF-TOKEN')) {
+      try {
+        await fetch('/csrf', {credentials: 'same-origin'});
+      } catch (err) {
+        console.error("CSRF 재요청 실패:", err);
+      }
+    }
+  })
+
+  window.onload = loadIssueList;
+</script>
+
+</body>
+</html>

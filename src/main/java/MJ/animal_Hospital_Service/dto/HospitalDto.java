@@ -1,21 +1,62 @@
 package MJ.animal_Hospital_Service.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class HospitalDto {
-  String location_id;
-  String place_name;
-  String category_name;
-  String category_group_code;
-  String category_group_name;
-  String phone;
-  String address_name;
-  String road_address_name;
-  String x;
-  String y;
-  String place_url;
+
+  private String name;
+  @JsonProperty("formattedAddress")
+  private String formattedAddress;
+  private double lat;
+  private double lng;
+  @JsonProperty("id")
+  private String placeId;
+  private String weekdayDescriptions;
+  private boolean openNow;
+  private String tag;
+  private String tag2;
+  private String tag3;
+  private String websiteUri;
+  private String nationalPhoneNumber;
+
+  @JsonProperty("location")
+  private void unpackGeometry(Map<String, Object> location) {
+    this.lat = (Double) location.get("latitude");
+    this.lng = (Double) location.get("longitude");
+  }
+//
+//  @JsonProperty("opening_hours")
+//  private void unpackOpeningHours(Map<String, Object> openingHours) {
+//    if (openingHours != null && openingHours.get("open_now") != null) {
+//      this.openNow = (Boolean) openingHours.get("open_now");
+//    }
+//  }
+
+  @JsonProperty("displayName")
+  private void getName(Map<String, Object> displayName){
+    this.name = (String) displayName.get("text");
+  }
+
+  @JsonProperty("regularOpeningHours")
+  private void getTime(Map<String,Object> opening){
+    this.openNow = (boolean) opening.get("openNow");
+    List<String> openingList = (List<String>) opening.get("weekdayDescriptions");
+    StringBuilder descriptions = new StringBuilder();
+    for(String s : openingList){
+      descriptions.append(s);
+      descriptions.append("\n");
+    }
+
+    descriptions.deleteCharAt(descriptions.length()-1);
+    this.weekdayDescriptions = descriptions.toString();
+
+  }
+
 }
