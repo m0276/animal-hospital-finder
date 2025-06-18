@@ -16,7 +16,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
 
@@ -25,9 +25,7 @@ spring:
     name: "animal_hospital_db"
     username: ${username}
     password: ${password}
-    url: "jdbc:mysql://localhost:3306/animal_hospital_db?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC"
-    #mysql:3306
-
+    url: ${db_url}
 server:
   servlet:
     session:
